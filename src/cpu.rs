@@ -13,3 +13,16 @@ pub struct Cpu {
     // Stack Pointer
     pub sp: u16,
 }
+
+impl Default for Cpu {
+    fn default() -> Self {
+        Self {
+            a:  0,
+            x:  0,
+            y:  0,
+            p:  0,
+            pc: 0,
+            sp: 0,
+        }
+    }
+}
