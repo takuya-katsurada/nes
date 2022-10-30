@@ -1,7 +1,6 @@
 [package]
-name = "nes"
+name = "cpu"
 version = "0.1.0"
 edition = "2018"
 
 [dependencies]
-cpu = { path = "crates/cpu" }

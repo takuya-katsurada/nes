@@ -1,3 +1,5 @@
+mod instruction;
+
 #[derive(Clone)]
 pub struct Cpu {
     // Accumulator
@@ -13,19 +15,6 @@ pub struct Cpu {
     // Stack Pointer
     pub sp: u16,
 }
-
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
-enum Opcode {
-    AND
-}
-
-#[derive(PartialEq, Eq, Copy, Clone, Debug)]
-enum AddressingMode {
-    Immediate
-}
-
-#[derive(Copy, Clone, Debug)]
-struct Instruction(Opcode, AddressingMode);
 
 impl Default for Cpu {
     fn default() -> Self {
