@@ -19,6 +19,11 @@ enum Opcode {
     AND
 }
 
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+enum AddressingMode {
+    Immediate
+}
+
 impl Default for Cpu {
     fn default() -> Self {
         Self {
