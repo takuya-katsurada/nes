@@ -14,6 +14,11 @@ pub struct Cpu {
     pub sp: u16,
 }
 
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+enum Opcode {
+    AND
+}
+
 impl Default for Cpu {
     fn default() -> Self {
         Self {
