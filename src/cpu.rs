@@ -24,6 +24,9 @@ enum AddressingMode {
     Immediate
 }
 
+#[derive(Copy, Clone, Debug)]
+struct Instruction(Opcode, AddressingMode);
+
 impl Default for Cpu {
     fn default() -> Self {
         Self {
