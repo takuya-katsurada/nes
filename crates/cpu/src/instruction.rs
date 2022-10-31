@@ -1,6 +1,7 @@
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Opcode {
-    AND
+    AND,
+    EOR,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -34,6 +35,15 @@ impl Instruction {
             0x35 => Instruction(Opcode::AND, AddressingMode::ZeroPageX),
             0x39 => Instruction(Opcode::AND, AddressingMode::AbsoluteY),
             0x3d => Instruction(Opcode::AND, AddressingMode::AbsoluteX),
+            0x41 => Instruction(Opcode::EOR, AddressingMode::IndirectX),
+            0x45 => Instruction(Opcode::EOR, AddressingMode::ZeroPage),
+            0x49 => Instruction(Opcode::EOR, AddressingMode::Immediate),
+            0x4d => Instruction(Opcode::EOR, AddressingMode::Absolute),
+            0x51 => Instruction(Opcode::EOR, AddressingMode::IndirectY),
+            0x55 => Instruction(Opcode::EOR, AddressingMode::ZeroPageX),
+            0x59 => Instruction(Opcode::EOR, AddressingMode::AbsoluteY),
+            0x5d => Instruction(Opcode::EOR, AddressingMode::AbsoluteX),
+
             _ => panic!("unsupported CPU instruction:{:08x}", opcode),
         }
     }
@@ -58,6 +68,26 @@ mod tests {
                 0x39 => AddressingMode::AbsoluteY,
                 0x21 => AddressingMode::IndirectX,
                 0x31 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_eor_instruction_was_created_from_opcode() {
+        let opcodes = [0x41u8,0x45u8,0x49u8,0x4du8,0x51u8,0x55u8,0x59u8,0x5du8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::EOR);
+            assert_eq!(instruction.1, match op {
+                0x49 => AddressingMode::Immediate,
+                0x45 => AddressingMode::ZeroPage,
+                0x55 => AddressingMode::ZeroPageX,
+                0x4d => AddressingMode::Absolute,
+                0x5d => AddressingMode::AbsoluteX,
+                0x59 => AddressingMode::AbsoluteY,
+                0x41 => AddressingMode::IndirectX,
+                0x51 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
         }
