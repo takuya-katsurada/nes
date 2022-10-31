@@ -45,7 +45,7 @@ mod tests {
 
     #[test]
     fn whether_and_instruction_was_created_from_opcode() {
-        let opcodes = [0x21u8,0x25u8];
+        let opcodes = [0x21u8,0x25u8,0x29u8,0x2du8,0x31u8,0x35u8,0x39u8,0x3du8];
         for op in opcodes {
             let instruction = Instruction::from(op);
             assert_eq!(instruction.0, Opcode::AND);
