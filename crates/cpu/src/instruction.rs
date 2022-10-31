@@ -5,6 +5,7 @@ pub enum Opcode {
     ORA,
     INX,
     INY,
+    DEX,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -55,6 +56,7 @@ impl Instruction {
             0x59 => Instruction(Opcode::EOR, AddressingMode::AbsoluteY),
             0x5d => Instruction(Opcode::EOR, AddressingMode::AbsoluteX),
             0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
+            0xca => Instruction(Opcode::DEX, AddressingMode::Implied),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
 
             _ => panic!("unsupported CPU instruction:{:08x}", opcode),
@@ -137,6 +139,13 @@ mod tests {
     fn whether_iny_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xc8u8);
         assert_eq!(instruction.0, Opcode::INY);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_dex_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xcau8);
+        assert_eq!(instruction.0, Opcode::DEX);
         assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
