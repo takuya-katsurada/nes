@@ -38,3 +38,28 @@ impl Instruction {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::instruction::{Instruction, Opcode, AddressingMode};
+
+    #[test]
+    fn whether_and_instruction_was_created_from_opcode() {
+        let opcodes = [0x21u8,0x25u8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::AND);
+            assert_eq!(instruction.1, match op {
+                0x29 => AddressingMode::Immediate,
+                0x25 => AddressingMode::ZeroPage,
+                0x35 => AddressingMode::ZeroPageX,
+                0x2d => AddressingMode::Absolute,
+                0x3d => AddressingMode::AbsoluteX,
+                0x39 => AddressingMode::AbsoluteY,
+                0x21 => AddressingMode::IndirectX,
+                0x31 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+}
