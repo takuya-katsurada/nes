@@ -6,6 +6,7 @@ pub enum Opcode {
     INX,
     INY,
     DEX,
+    DEY,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -55,6 +56,7 @@ impl Instruction {
             0x55 => Instruction(Opcode::EOR, AddressingMode::ZeroPageX),
             0x59 => Instruction(Opcode::EOR, AddressingMode::AbsoluteY),
             0x5d => Instruction(Opcode::EOR, AddressingMode::AbsoluteX),
+            0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
             0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
             0xca => Instruction(Opcode::DEX, AddressingMode::Implied),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
@@ -146,6 +148,13 @@ mod tests {
     fn whether_dex_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xcau8);
         assert_eq!(instruction.0, Opcode::DEX);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_dey_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x88u8);
+        assert_eq!(instruction.0, Opcode::DEY);
         assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
