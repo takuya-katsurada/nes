@@ -7,6 +7,7 @@ pub enum Opcode {
     BCS,
     BEQ,
     BIT,
+    BMI,
     DEC,
     DEX,
     DEY,
@@ -59,6 +60,7 @@ impl Instruction {
             0x29 => Instruction(Opcode::AND, AddressingMode::Immediate),
             0x2c => Instruction(Opcode::BIT, AddressingMode::Absolute),
             0x2d => Instruction(Opcode::AND, AddressingMode::Absolute),
+            0x30 => Instruction(Opcode::BMI, AddressingMode::Relative),
             0x31 => Instruction(Opcode::AND, AddressingMode::IndirectY),
             0x35 => Instruction(Opcode::AND, AddressingMode::ZeroPageX),
             0x39 => Instruction(Opcode::AND, AddressingMode::AbsoluteY),
@@ -194,6 +196,13 @@ mod tests {
                 _ => panic!("invalid opcode has been specified")
             });
         }
+    }
+
+    #[test]
+    fn whether_bmi_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x30u8);
+        assert_eq!(instruction.0, Opcode::BMI);
+        assert_eq!(instruction.1, AddressingMode::Relative);
     }
 
     #[test]
