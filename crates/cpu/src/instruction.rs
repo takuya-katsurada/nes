@@ -6,6 +6,7 @@ pub enum Opcode {
     INC,
     INX,
     INY,
+    DEC,
     DEX,
     DEY,
 }
@@ -58,8 +59,12 @@ impl Instruction {
             0x59 => Instruction(Opcode::EOR, AddressingMode::AbsoluteY),
             0x5d => Instruction(Opcode::EOR, AddressingMode::AbsoluteX),
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
+            0xc6 => Instruction(Opcode::DEC, AddressingMode::ZeroPage),
             0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
             0xca => Instruction(Opcode::DEX, AddressingMode::Implied),
+            0xce => Instruction(Opcode::DEC, AddressingMode::Absolute),
+            0xd6 => Instruction(Opcode::DEC, AddressingMode::ZeroPageX),
+            0xde => Instruction(Opcode::DEC, AddressingMode::AbsoluteX),
             0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
             0xee => Instruction(Opcode::INC, AddressingMode::Absolute),
@@ -150,7 +155,7 @@ mod tests {
             });
         }
     }
-    
+
     #[test]
     fn whether_inx_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xe8u8);
@@ -177,5 +182,21 @@ mod tests {
         let instruction = Instruction::from(0x88u8);
         assert_eq!(instruction.0, Opcode::DEY);
         assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_dec_instruction_was_created_from_opcode() {
+        let opcodes = [0xc6u8,0xceu8,0xd6u8,0xdeu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::DEC);
+            assert_eq!(instruction.1, match op {
+                0xc6 => AddressingMode::ZeroPage,
+                0xd6 => AddressingMode::ZeroPageX,
+                0xce => AddressingMode::Absolute,
+                0xde => AddressingMode::AbsoluteX,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
     }
 }
