@@ -6,7 +6,9 @@ edition = "2018"
 [workspace]
 members = [
   "crates/cpu",
+  "crates/memory",
 ]
 
 [dependencies]
 cpu = { path = "crates/cpu" }
+memory = { path = "crates/memory" }
