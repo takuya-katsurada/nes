@@ -6,6 +6,7 @@ pub enum Opcode {
     BCC,
     BCS,
     BEQ,
+    BIT,
     DEC,
     DEX,
     DEY,
@@ -53,8 +54,10 @@ impl Instruction {
             0x1d => Instruction(Opcode::ORA, AddressingMode::AbsoluteX),
             0x1e => Instruction(Opcode::ASL, AddressingMode::AbsoluteX),
             0x21 => Instruction(Opcode::AND, AddressingMode::IndirectX),
+            0x24 => Instruction(Opcode::BIT, AddressingMode::ZeroPage),
             0x25 => Instruction(Opcode::AND, AddressingMode::ZeroPage),
             0x29 => Instruction(Opcode::AND, AddressingMode::Immediate),
+            0x2c => Instruction(Opcode::BIT, AddressingMode::Absolute),
             0x2d => Instruction(Opcode::AND, AddressingMode::Absolute),
             0x31 => Instruction(Opcode::AND, AddressingMode::IndirectY),
             0x35 => Instruction(Opcode::AND, AddressingMode::ZeroPageX),
@@ -177,6 +180,20 @@ mod tests {
         let instruction = Instruction::from(0xf0u8);
         assert_eq!(instruction.0, Opcode::BEQ);
         assert_eq!(instruction.1, AddressingMode::Relative);
+    }
+
+    #[test]
+    fn whether_bit_instruction_was_created_from_opcode() {
+        let opcodes = [0x24u8,0x2cu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::BIT);
+            assert_eq!(instruction.1, match op {
+                0x24 => AddressingMode::ZeroPage,
+                0x2c => AddressingMode::Absolute,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
     }
 
     #[test]
