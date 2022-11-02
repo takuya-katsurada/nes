@@ -2,6 +2,7 @@
 pub enum Opcode {
     ADC,
     AND,
+    ASL,
     DEC,
     DEX,
     DEY,
@@ -37,12 +38,17 @@ impl Instruction {
         match opcode {
             0x01 => Instruction(Opcode::ORA, AddressingMode::IndirectX),
             0x05 => Instruction(Opcode::ORA, AddressingMode::ZeroPage),
+            0x06 => Instruction(Opcode::ASL, AddressingMode::ZeroPage),
             0x09 => Instruction(Opcode::ORA, AddressingMode::Immediate),
             0x0d => Instruction(Opcode::ORA, AddressingMode::Absolute),
             0x11 => Instruction(Opcode::ORA, AddressingMode::IndirectY),
             0x15 => Instruction(Opcode::ORA, AddressingMode::ZeroPageX),
             0x19 => Instruction(Opcode::ORA, AddressingMode::AbsoluteY),
+            0x0a => Instruction(Opcode::ASL, AddressingMode::Accumulator),
+            0x0e => Instruction(Opcode::ASL, AddressingMode::Absolute),
+            0x16 => Instruction(Opcode::ASL, AddressingMode::ZeroPageX),
             0x1d => Instruction(Opcode::ORA, AddressingMode::AbsoluteX),
+            0x1e => Instruction(Opcode::ASL, AddressingMode::AbsoluteX),
             0x21 => Instruction(Opcode::AND, AddressingMode::IndirectX),
             0x25 => Instruction(Opcode::AND, AddressingMode::ZeroPage),
             0x29 => Instruction(Opcode::AND, AddressingMode::Immediate),
@@ -124,6 +130,23 @@ mod tests {
                 0x39 => AddressingMode::AbsoluteY,
                 0x21 => AddressingMode::IndirectX,
                 0x31 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_asl_instruction_was_created_from_opcode() {
+        let opcodes = [0x06u8,0x0au8,0x0eu8,0x16u8,0x1eu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::ASL);
+            assert_eq!(instruction.1, match op {
+                0x0a => AddressingMode::Accumulator,
+                0x06 => AddressingMode::ZeroPage,
+                0x16 => AddressingMode::ZeroPageX,
+                0x0e => AddressingMode::Absolute,
+                0x1e => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
         }
