@@ -10,6 +10,7 @@ pub enum Opcode {
     BMI,
     BNE,
     BPL,
+    BRK,
     DEC,
     DEX,
     DEY,
@@ -43,6 +44,7 @@ pub struct Instruction(Opcode, AddressingMode);
 impl Instruction {
     pub fn from(opcode: u8) -> Instruction {
         match opcode {
+            0x00 => Instruction(Opcode::BRK, AddressingMode::Implied),
             0x01 => Instruction(Opcode::ORA, AddressingMode::IndirectX),
             0x05 => Instruction(Opcode::ORA, AddressingMode::ZeroPage),
             0x06 => Instruction(Opcode::ASL, AddressingMode::ZeroPage),
@@ -221,6 +223,13 @@ mod tests {
         let instruction = Instruction::from(0x10u8);
         assert_eq!(instruction.0, Opcode::BPL);
         assert_eq!(instruction.1, AddressingMode::Relative);
+    }
+
+    #[test]
+    fn whether_brk_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x00u8);
+        assert_eq!(instruction.0, Opcode::BRK);
+        assert_eq!(instruction.1, AddressingMode::Implied);
     }
 
     #[test]
