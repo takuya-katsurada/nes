@@ -3,6 +3,7 @@ pub enum Opcode {
     AND,
     EOR,
     ORA,
+    INC,
     INX,
     INY,
     DEX,
@@ -59,7 +60,11 @@ impl Instruction {
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
             0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
             0xca => Instruction(Opcode::DEX, AddressingMode::Implied),
+            0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
+            0xee => Instruction(Opcode::INC, AddressingMode::Absolute),
+            0xf6 => Instruction(Opcode::INC, AddressingMode::ZeroPageX),
+            0xfe => Instruction(Opcode::INC, AddressingMode::AbsoluteX),
 
             _ => panic!("unsupported CPU instruction:{:08x}", opcode),
         }
@@ -130,6 +135,22 @@ mod tests {
         }
     }
 
+    #[test]
+    fn whether_inc_instruction_was_created_from_opcode() {
+        let opcodes = [0xe6u8,0xeeu8,0xf6u8,0xfeu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::INC);
+            assert_eq!(instruction.1, match op {
+                0xe6 => AddressingMode::ZeroPage,
+                0xf6 => AddressingMode::ZeroPageX,
+                0xee => AddressingMode::Absolute,
+                0xfe => AddressingMode::AbsoluteX,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+    
     #[test]
     fn whether_inx_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xe8u8);
