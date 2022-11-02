@@ -5,6 +5,7 @@ pub enum Opcode {
     ASL,
     BCC,
     BCS,
+    BEQ,
     DEC,
     DEX,
     DEY,
@@ -87,6 +88,7 @@ impl Instruction {
             0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
             0xee => Instruction(Opcode::INC, AddressingMode::Absolute),
+            0xf0 => Instruction(Opcode::BEQ, AddressingMode::Relative),
             0xf6 => Instruction(Opcode::INC, AddressingMode::ZeroPageX),
             0xfe => Instruction(Opcode::INC, AddressingMode::AbsoluteX),
 
@@ -167,6 +169,13 @@ mod tests {
     fn whether_bcs_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xb0u8);
         assert_eq!(instruction.0, Opcode::BCS);
+        assert_eq!(instruction.1, AddressingMode::Relative);
+    }
+
+    #[test]
+    fn whether_beq_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xf0u8);
+        assert_eq!(instruction.0, Opcode::BEQ);
         assert_eq!(instruction.1, AddressingMode::Relative);
     }
 
