@@ -1,14 +1,14 @@
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Opcode {
     AND,
-    EOR,
-    ORA,
-    INC,
-    INX,
-    INY,
     DEC,
     DEX,
     DEY,
+    EOR,
+    INC,
+    INX,
+    INY,
+    ORA,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -101,6 +101,36 @@ mod tests {
     }
 
     #[test]
+    fn whether_dec_instruction_was_created_from_opcode() {
+        let opcodes = [0xc6u8,0xceu8,0xd6u8,0xdeu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::DEC);
+            assert_eq!(instruction.1, match op {
+                0xc6 => AddressingMode::ZeroPage,
+                0xd6 => AddressingMode::ZeroPageX,
+                0xce => AddressingMode::Absolute,
+                0xde => AddressingMode::AbsoluteX,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_dex_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xcau8);
+        assert_eq!(instruction.0, Opcode::DEX);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_dey_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x88u8);
+        assert_eq!(instruction.0, Opcode::DEY);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
     fn whether_eor_instruction_was_created_from_opcode() {
         let opcodes = [0x41u8,0x45u8,0x49u8,0x4du8,0x51u8,0x55u8,0x59u8,0x5du8];
         for op in opcodes {
@@ -115,26 +145,6 @@ mod tests {
                 0x59 => AddressingMode::AbsoluteY,
                 0x41 => AddressingMode::IndirectX,
                 0x51 => AddressingMode::IndirectY,
-                _ => panic!("invalid opcode has been specified")
-            });
-        }
-    }
-
-    #[test]
-    fn whether_ora_instruction_was_created_from_opcode() {
-        let opcodes = [0x01u8,0x05u8,0x09u8,0x0du8,0x11u8,0x15u8,0x19u8,0x1du8];
-        for op in opcodes {
-            let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::ORA);
-            assert_eq!(instruction.1, match op {
-                0x09 => AddressingMode::Immediate,
-                0x05 => AddressingMode::ZeroPage,
-                0x15 => AddressingMode::ZeroPageX,
-                0x0d => AddressingMode::Absolute,
-                0x1d => AddressingMode::AbsoluteX,
-                0x19 => AddressingMode::AbsoluteY,
-                0x01 => AddressingMode::IndirectX,
-                0x11 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
         }
@@ -171,30 +181,20 @@ mod tests {
     }
 
     #[test]
-    fn whether_dex_instruction_was_created_from_opcode() {
-        let instruction = Instruction::from(0xcau8);
-        assert_eq!(instruction.0, Opcode::DEX);
-        assert_eq!(instruction.1, AddressingMode::Implied);
-    }
-
-    #[test]
-    fn whether_dey_instruction_was_created_from_opcode() {
-        let instruction = Instruction::from(0x88u8);
-        assert_eq!(instruction.0, Opcode::DEY);
-        assert_eq!(instruction.1, AddressingMode::Implied);
-    }
-
-    #[test]
-    fn whether_dec_instruction_was_created_from_opcode() {
-        let opcodes = [0xc6u8,0xceu8,0xd6u8,0xdeu8];
+    fn whether_ora_instruction_was_created_from_opcode() {
+        let opcodes = [0x01u8,0x05u8,0x09u8,0x0du8,0x11u8,0x15u8,0x19u8,0x1du8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::DEC);
+            assert_eq!(instruction.0, Opcode::ORA);
             assert_eq!(instruction.1, match op {
-                0xc6 => AddressingMode::ZeroPage,
-                0xd6 => AddressingMode::ZeroPageX,
-                0xce => AddressingMode::Absolute,
-                0xde => AddressingMode::AbsoluteX,
+                0x09 => AddressingMode::Immediate,
+                0x05 => AddressingMode::ZeroPage,
+                0x15 => AddressingMode::ZeroPageX,
+                0x0d => AddressingMode::Absolute,
+                0x1d => AddressingMode::AbsoluteX,
+                0x19 => AddressingMode::AbsoluteY,
+                0x01 => AddressingMode::IndirectX,
+                0x11 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
         }
