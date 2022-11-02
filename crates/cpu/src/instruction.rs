@@ -8,6 +8,7 @@ pub enum Opcode {
     BEQ,
     BIT,
     BMI,
+    BNE,
     DEC,
     DEX,
     DEY,
@@ -88,6 +89,7 @@ impl Instruction {
             0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
             0xca => Instruction(Opcode::DEX, AddressingMode::Implied),
             0xce => Instruction(Opcode::DEC, AddressingMode::Absolute),
+            0xd0 => Instruction(Opcode::BNE, AddressingMode::Relative),
             0xd6 => Instruction(Opcode::DEC, AddressingMode::ZeroPageX),
             0xde => Instruction(Opcode::DEC, AddressingMode::AbsoluteX),
             0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
@@ -202,6 +204,13 @@ mod tests {
     fn whether_bmi_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x30u8);
         assert_eq!(instruction.0, Opcode::BMI);
+        assert_eq!(instruction.1, AddressingMode::Relative);
+    }
+
+    #[test]
+    fn whether_bne_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xd0u8);
+        assert_eq!(instruction.0, Opcode::BNE);
         assert_eq!(instruction.1, AddressingMode::Relative);
     }
 
