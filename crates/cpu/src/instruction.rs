@@ -14,6 +14,7 @@ pub enum Opcode {
     BVC,
     BVS,
     CLC,
+    CLD,
     DEC,
     DEX,
     DEY,
@@ -101,6 +102,7 @@ impl Instruction {
             0xce => Instruction(Opcode::DEC, AddressingMode::Absolute),
             0xd0 => Instruction(Opcode::BNE, AddressingMode::Relative),
             0xd6 => Instruction(Opcode::DEC, AddressingMode::ZeroPageX),
+            0xd8 => Instruction(Opcode::CLD, AddressingMode::Implied),
             0xde => Instruction(Opcode::DEC, AddressingMode::AbsoluteX),
             0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
@@ -256,6 +258,13 @@ mod tests {
     fn whether_clc_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x18u8);
         assert_eq!(instruction.0, Opcode::CLC);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_cld_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xd8u8);
+        assert_eq!(instruction.0, Opcode::CLD);
         assert_eq!(instruction.1, AddressingMode::Implied);
     }
 
