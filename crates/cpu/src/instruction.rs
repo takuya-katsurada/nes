@@ -1,5 +1,6 @@
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Opcode {
+    ADC,
     AND,
     DEC,
     DEX,
@@ -58,6 +59,14 @@ impl Instruction {
             0x55 => Instruction(Opcode::EOR, AddressingMode::ZeroPageX),
             0x59 => Instruction(Opcode::EOR, AddressingMode::AbsoluteY),
             0x5d => Instruction(Opcode::EOR, AddressingMode::AbsoluteX),
+            0x61 => Instruction(Opcode::ADC, AddressingMode::IndirectX),
+            0x65 => Instruction(Opcode::ADC, AddressingMode::ZeroPage),
+            0x69 => Instruction(Opcode::ADC, AddressingMode::Immediate),
+            0x6d => Instruction(Opcode::ADC, AddressingMode::Absolute),
+            0x71 => Instruction(Opcode::ADC, AddressingMode::IndirectY),
+            0x75 => Instruction(Opcode::ADC, AddressingMode::ZeroPageX),
+            0x79 => Instruction(Opcode::ADC, AddressingMode::AbsoluteY),
+            0x7d => Instruction(Opcode::ADC, AddressingMode::AbsoluteX),
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
             0xc6 => Instruction(Opcode::DEC, AddressingMode::ZeroPage),
             0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
@@ -79,6 +88,26 @@ impl Instruction {
 #[cfg(test)]
 mod tests {
     use crate::instruction::{Instruction, Opcode, AddressingMode};
+
+    #[test]
+    fn whether_adc_instruction_was_created_from_opcode() {
+        let opcodes = [0x61u8,0x65u8,0x69u8,0x6du8,0x71u8,0x75u8,0x79u8,0x7du8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::ADC);
+            assert_eq!(instruction.1, match op {
+                0x69 => AddressingMode::Immediate,
+                0x65 => AddressingMode::ZeroPage,
+                0x75 => AddressingMode::ZeroPageX,
+                0x6d => AddressingMode::Absolute,
+                0x7d => AddressingMode::AbsoluteX,
+                0x79 => AddressingMode::AbsoluteY,
+                0x61 => AddressingMode::IndirectX,
+                0x71 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
 
     #[test]
     fn whether_and_instruction_was_created_from_opcode() {
