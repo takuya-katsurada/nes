@@ -9,6 +9,7 @@ pub enum Opcode {
     BIT,
     BMI,
     BNE,
+    BPL,
     DEC,
     DEX,
     DEY,
@@ -52,6 +53,7 @@ impl Instruction {
             0x19 => Instruction(Opcode::ORA, AddressingMode::AbsoluteY),
             0x0a => Instruction(Opcode::ASL, AddressingMode::Accumulator),
             0x0e => Instruction(Opcode::ASL, AddressingMode::Absolute),
+            0x10 => Instruction(Opcode::BPL, AddressingMode::Relative),
             0x16 => Instruction(Opcode::ASL, AddressingMode::ZeroPageX),
             0x1d => Instruction(Opcode::ORA, AddressingMode::AbsoluteX),
             0x1e => Instruction(Opcode::ASL, AddressingMode::AbsoluteX),
@@ -211,6 +213,13 @@ mod tests {
     fn whether_bne_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xd0u8);
         assert_eq!(instruction.0, Opcode::BNE);
+        assert_eq!(instruction.1, AddressingMode::Relative);
+    }
+
+    #[test]
+    fn whether_bpl_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x10u8);
+        assert_eq!(instruction.0, Opcode::BPL);
         assert_eq!(instruction.1, AddressingMode::Relative);
     }
 
