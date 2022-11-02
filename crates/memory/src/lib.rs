@@ -1,3 +1,5 @@
+pub mod system;
+
 pub const RAM_SIZE: usize = 0x0800;
 
 #[derive(Clone)]
