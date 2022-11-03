@@ -17,6 +17,7 @@ pub enum Opcode {
     CLD,
     CLI,
     CLV,
+    CMP,
     DEC,
     DEX,
     DEY,
@@ -100,13 +101,21 @@ impl Instruction {
             0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
             0xb0 => Instruction(Opcode::BCS, AddressingMode::Relative),
             0xb8 => Instruction(Opcode::CLV, AddressingMode::Implied),
+            0xc1 => Instruction(Opcode::CMP, AddressingMode::IndirectX),
+            0xc5 => Instruction(Opcode::CMP, AddressingMode::ZeroPage),
             0xc6 => Instruction(Opcode::DEC, AddressingMode::ZeroPage),
             0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
+            0xc9 => Instruction(Opcode::CMP, AddressingMode::Immediate),
             0xca => Instruction(Opcode::DEX, AddressingMode::Implied),
+            0xcd => Instruction(Opcode::CMP, AddressingMode::Absolute),
             0xce => Instruction(Opcode::DEC, AddressingMode::Absolute),
             0xd0 => Instruction(Opcode::BNE, AddressingMode::Relative),
+            0xd1 => Instruction(Opcode::CMP, AddressingMode::IndirectY),
+            0xd5 => Instruction(Opcode::CMP, AddressingMode::ZeroPageX),
             0xd6 => Instruction(Opcode::DEC, AddressingMode::ZeroPageX),
             0xd8 => Instruction(Opcode::CLD, AddressingMode::Implied),
+            0xd9 => Instruction(Opcode::CMP, AddressingMode::AbsoluteY),
+            0xdd => Instruction(Opcode::CMP, AddressingMode::AbsoluteX),
             0xde => Instruction(Opcode::DEC, AddressingMode::AbsoluteX),
             0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
@@ -284,6 +293,26 @@ mod tests {
         let instruction = Instruction::from(0xb8u8);
         assert_eq!(instruction.0, Opcode::CLV);
         assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_cmp_instruction_was_created_from_opcode() {
+        let opcodes = [0xc1u8,0xc5u8,0xc9u8,0xcdu8,0xd1u8,0xd5u8,0xd9u8,0xddu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::CMP);
+            assert_eq!(instruction.1, match op {
+                0xc9 => AddressingMode::Immediate,
+                0xc5 => AddressingMode::ZeroPage,
+                0xd5 => AddressingMode::ZeroPageX,
+                0xcd => AddressingMode::Absolute,
+                0xdd => AddressingMode::AbsoluteX,
+                0xd9 => AddressingMode::AbsoluteY,
+                0xc1 => AddressingMode::IndirectX,
+                0xd1 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
     }
 
     #[test]
