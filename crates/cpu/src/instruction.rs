@@ -28,6 +28,7 @@ pub enum Opcode {
     INX,
     INY,
     JMP,
+    JSR,
     ORA,
 }
 
@@ -70,6 +71,7 @@ impl Instruction {
             0x18 => Instruction(Opcode::CLC, AddressingMode::Implied),
             0x1d => Instruction(Opcode::ORA, AddressingMode::AbsoluteX),
             0x1e => Instruction(Opcode::ASL, AddressingMode::AbsoluteX),
+            0x20 => Instruction(Opcode::JSR, AddressingMode::Absolute),
             0x21 => Instruction(Opcode::AND, AddressingMode::IndirectX),
             0x24 => Instruction(Opcode::BIT, AddressingMode::ZeroPage),
             0x25 => Instruction(Opcode::AND, AddressingMode::ZeroPage),
@@ -448,6 +450,13 @@ mod tests {
                 _ => panic!("invalid opcode has been specified")
             });
         }
+    }
+
+    #[test]
+    fn whether_jsr_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x20u8);
+        assert_eq!(instruction.0, Opcode::JSR);
+        assert_eq!(instruction.1, AddressingMode::Absolute);
     }
 
     #[test]
