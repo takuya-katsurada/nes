@@ -27,6 +27,7 @@ pub enum Opcode {
     INC,
     INX,
     INY,
+    JMP,
     ORA,
 }
 
@@ -83,6 +84,7 @@ impl Instruction {
             0x41 => Instruction(Opcode::EOR, AddressingMode::IndirectX),
             0x45 => Instruction(Opcode::EOR, AddressingMode::ZeroPage),
             0x49 => Instruction(Opcode::EOR, AddressingMode::Immediate),
+            0x4c => Instruction(Opcode::JMP, AddressingMode::Absolute),
             0x4d => Instruction(Opcode::EOR, AddressingMode::Absolute),
             0x50 => Instruction(Opcode::BVC, AddressingMode::Relative),
             0x51 => Instruction(Opcode::EOR, AddressingMode::IndirectY),
@@ -93,6 +95,7 @@ impl Instruction {
             0x61 => Instruction(Opcode::ADC, AddressingMode::IndirectX),
             0x65 => Instruction(Opcode::ADC, AddressingMode::ZeroPage),
             0x69 => Instruction(Opcode::ADC, AddressingMode::Immediate),
+            0x6c => Instruction(Opcode::JMP, AddressingMode::Indirect),
             0x6d => Instruction(Opcode::ADC, AddressingMode::Absolute),
             0x70 => Instruction(Opcode::BVS, AddressingMode::Relative),
             0x71 => Instruction(Opcode::ADC, AddressingMode::IndirectY),
@@ -431,6 +434,20 @@ mod tests {
         let instruction = Instruction::from(0xc8u8);
         assert_eq!(instruction.0, Opcode::INY);
         assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_jmp_instruction_was_created_from_opcode() {
+        let opcodes = [0x4cu8,0x6cu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::JMP);
+            assert_eq!(instruction.1, match op {
+                0x4c => AddressingMode::Absolute,
+                0x6c => AddressingMode::Indirect,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
     }
 
     #[test]
