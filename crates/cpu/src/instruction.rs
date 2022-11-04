@@ -29,6 +29,7 @@ pub enum Opcode {
     INY,
     JMP,
     JSR,
+    LDA,
     ORA,
 }
 
@@ -106,8 +107,16 @@ impl Instruction {
             0x7d => Instruction(Opcode::ADC, AddressingMode::AbsoluteX),
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
             0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
+            0xa1 => Instruction(Opcode::LDA, AddressingMode::IndirectX),
+            0xa5 => Instruction(Opcode::LDA, AddressingMode::ZeroPage),
+            0xa9 => Instruction(Opcode::LDA, AddressingMode::Immediate),
+            0xad => Instruction(Opcode::LDA, AddressingMode::Absolute),
             0xb0 => Instruction(Opcode::BCS, AddressingMode::Relative),
+            0xb1 => Instruction(Opcode::LDA, AddressingMode::IndirectY),
+            0xb5 => Instruction(Opcode::LDA, AddressingMode::ZeroPageX),
             0xb8 => Instruction(Opcode::CLV, AddressingMode::Implied),
+            0xb9 => Instruction(Opcode::LDA, AddressingMode::AbsoluteY),
+            0xbd => Instruction(Opcode::LDA, AddressingMode::AbsoluteX),
             0xc0 => Instruction(Opcode::CPY, AddressingMode::Immediate),
             0xc1 => Instruction(Opcode::CMP, AddressingMode::IndirectX),
             0xc4 => Instruction(Opcode::CPY, AddressingMode::ZeroPage),
@@ -457,6 +466,26 @@ mod tests {
         let instruction = Instruction::from(0x20u8);
         assert_eq!(instruction.0, Opcode::JSR);
         assert_eq!(instruction.1, AddressingMode::Absolute);
+    }
+
+    #[test]
+    fn whether_lda_instruction_was_created_from_opcode() {
+        let opcodes = [0xa1u8,0xa5u8,0xa9u8,0xadu8,0xb1u8,0xb5u8,0xb9u8,0xbdu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::LDA);
+            assert_eq!(instruction.1, match op {
+                0xa9 => AddressingMode::Immediate,
+                0xa5 => AddressingMode::ZeroPage,
+                0xb5 => AddressingMode::ZeroPageX,
+                0xad => AddressingMode::Absolute,
+                0xbd => AddressingMode::AbsoluteX,
+                0xb9 => AddressingMode::AbsoluteY,
+                0xa1 => AddressingMode::IndirectX,
+                0xb1 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
     }
 
     #[test]
