@@ -19,6 +19,7 @@ pub enum Opcode {
     CLV,
     CMP,
     CPX,
+    CPY,
     DEC,
     DEX,
     DEY,
@@ -102,12 +103,15 @@ impl Instruction {
             0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
             0xb0 => Instruction(Opcode::BCS, AddressingMode::Relative),
             0xb8 => Instruction(Opcode::CLV, AddressingMode::Implied),
+            0xc0 => Instruction(Opcode::CPY, AddressingMode::Immediate),
             0xc1 => Instruction(Opcode::CMP, AddressingMode::IndirectX),
+            0xc4 => Instruction(Opcode::CPY, AddressingMode::ZeroPage),
             0xc5 => Instruction(Opcode::CMP, AddressingMode::ZeroPage),
             0xc6 => Instruction(Opcode::DEC, AddressingMode::ZeroPage),
             0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
             0xc9 => Instruction(Opcode::CMP, AddressingMode::Immediate),
             0xca => Instruction(Opcode::DEX, AddressingMode::Implied),
+            0xcc => Instruction(Opcode::CPY, AddressingMode::Absolute),
             0xcd => Instruction(Opcode::CMP, AddressingMode::Absolute),
             0xce => Instruction(Opcode::DEC, AddressingMode::Absolute),
             0xd0 => Instruction(Opcode::BNE, AddressingMode::Relative),
@@ -329,6 +333,21 @@ mod tests {
                 0xe0 => AddressingMode::Immediate,
                 0xe4 => AddressingMode::ZeroPage,
                 0xec => AddressingMode::Absolute,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_cpy_instruction_was_created_from_opcode() {
+        let opcodes = [0xc0u8,0xc4u8,0xccu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::CPY);
+            assert_eq!(instruction.1, match op {
+                0xc0 => AddressingMode::Immediate,
+                0xc4 => AddressingMode::ZeroPage,
+                0xcc => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
         }
