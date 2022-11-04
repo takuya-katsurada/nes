@@ -18,6 +18,7 @@ pub enum Opcode {
     CLI,
     CLV,
     CMP,
+    CPX,
     DEC,
     DEX,
     DEY,
@@ -117,8 +118,11 @@ impl Instruction {
             0xd9 => Instruction(Opcode::CMP, AddressingMode::AbsoluteY),
             0xdd => Instruction(Opcode::CMP, AddressingMode::AbsoluteX),
             0xde => Instruction(Opcode::DEC, AddressingMode::AbsoluteX),
+            0xe0 => Instruction(Opcode::CPX, AddressingMode::Immediate),
+            0xe4 => Instruction(Opcode::CPX, AddressingMode::ZeroPage),
             0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
+            0xec => Instruction(Opcode::CPX, AddressingMode::Absolute),
             0xee => Instruction(Opcode::INC, AddressingMode::Absolute),
             0xf0 => Instruction(Opcode::BEQ, AddressingMode::Relative),
             0xf6 => Instruction(Opcode::INC, AddressingMode::ZeroPageX),
@@ -310,6 +314,21 @@ mod tests {
                 0xd9 => AddressingMode::AbsoluteY,
                 0xc1 => AddressingMode::IndirectX,
                 0xd1 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_cpx_instruction_was_created_from_opcode() {
+        let opcodes = [0xe0u8,0xe4u8,0xecu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::CPX);
+            assert_eq!(instruction.1, match op {
+                0xe0 => AddressingMode::Immediate,
+                0xe4 => AddressingMode::ZeroPage,
+                0xec => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
         }
