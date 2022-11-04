@@ -1,8 +1,11 @@
 mod fetch;
 mod instruction;
+mod register;
 
 use memory::Memory;
 use memory::system::SystemBus;
+
+use crate::instruction::{Opcode,AddressingMode,Instruction};
 
 #[derive(Clone)]
 pub struct Cpu {
@@ -30,5 +33,39 @@ impl Default for Cpu {
             pc: 0,
             sp: 0,
         }
+    }
+}
+
+impl Cpu {
+    pub fn step(&mut self, system: &mut memory::system::SystemBus) -> u8 {
+        let raw_opcode = self.fetch_u8(system);
+        let Instruction(opcode, mode) = Instruction::from(raw_opcode);
+
+        match opcode {
+            Opcode::CLC => {
+                self.write_carry_flag(false);
+                2
+            }
+            _ => panic!("invalid opcode has been specified")
+        }
+    }
+}
+
+mod tests {
+    use memory::system::SystemBus;
+
+    # [test]
+    fn execute_clc_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0000u16;
+        cpu.write_carry_flag(true);
+        mem.write_u8(0x0000, 0x18u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.read_carry_flag(), false);
+        assert_eq!(cycle, 0x02u8);
     }
 }

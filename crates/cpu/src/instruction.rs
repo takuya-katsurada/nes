@@ -51,7 +51,7 @@ pub enum AddressingMode {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct Instruction(Opcode, AddressingMode);
+pub struct Instruction(pub Opcode, pub AddressingMode);
 
 impl Instruction {
     pub fn from(opcode: u8) -> Instruction {

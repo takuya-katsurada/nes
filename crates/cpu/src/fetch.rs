@@ -1,7 +1,7 @@
 use crate::Cpu;
 
 impl Cpu {
-    fn fetch_u8(&mut self, system: &mut memory::system::SystemBus) -> u8 {
+    pub(crate) fn fetch_u8(&mut self, system: &mut memory::system::SystemBus) -> u8 {
         let v = system.read_u8(self.pc);
         self.pc += 1;
         v
