@@ -42,6 +42,7 @@ pub enum Opcode {
     ROL,
     ROR,
     RTI,
+    RTS,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -120,6 +121,7 @@ impl Instruction {
             0x59 => Instruction(Opcode::EOR, AddressingMode::AbsoluteY),
             0x5d => Instruction(Opcode::EOR, AddressingMode::AbsoluteX),
             0x5e => Instruction(Opcode::LSR, AddressingMode::AbsoluteX),
+            0x60 => Instruction(Opcode::RTS, AddressingMode::Implied),
             0x61 => Instruction(Opcode::ADC, AddressingMode::IndirectX),
             0x65 => Instruction(Opcode::ADC, AddressingMode::ZeroPage),
             0x66 => Instruction(Opcode::ROR, AddressingMode::ZeroPage),
@@ -679,6 +681,13 @@ mod tests {
     fn whether_rti_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x40u8);
         assert_eq!(instruction.0, Opcode::RTI);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_rts_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x60u8);
+        assert_eq!(instruction.0, Opcode::RTS);
         assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
