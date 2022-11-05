@@ -36,6 +36,7 @@ pub enum Opcode {
     NOP,
     ORA,
     PHA,
+    PHP,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -65,6 +66,7 @@ impl Instruction {
             0x01 => Instruction(Opcode::ORA, AddressingMode::IndirectX),
             0x05 => Instruction(Opcode::ORA, AddressingMode::ZeroPage),
             0x06 => Instruction(Opcode::ASL, AddressingMode::ZeroPage),
+            0x08 => Instruction(Opcode::PHP, AddressingMode::Implied),
             0x09 => Instruction(Opcode::ORA, AddressingMode::Immediate),
             0x0d => Instruction(Opcode::ORA, AddressingMode::Absolute),
             0x11 => Instruction(Opcode::ORA, AddressingMode::IndirectY),
@@ -597,6 +599,13 @@ mod tests {
     fn whether_pha_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x48u8);
         assert_eq!(instruction.0, Opcode::PHA);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_php_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x08u8);
+        assert_eq!(instruction.0, Opcode::PHP);
         assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
