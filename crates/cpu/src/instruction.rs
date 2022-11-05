@@ -35,6 +35,7 @@ pub enum Opcode {
     LSR,
     NOP,
     ORA,
+    PHA,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -91,6 +92,7 @@ impl Instruction {
             0x41 => Instruction(Opcode::EOR, AddressingMode::IndirectX),
             0x45 => Instruction(Opcode::EOR, AddressingMode::ZeroPage),
             0x46 => Instruction(Opcode::LSR, AddressingMode::ZeroPage),
+            0x48 => Instruction(Opcode::PHA, AddressingMode::Implied),
             0x49 => Instruction(Opcode::EOR, AddressingMode::Immediate),
             0x4a => Instruction(Opcode::LSR, AddressingMode::Accumulator),
             0x4c => Instruction(Opcode::JMP, AddressingMode::Absolute),
@@ -589,5 +591,12 @@ mod tests {
                 _ => panic!("invalid opcode has been specified")
             });
         }
+    }
+
+    #[test]
+    fn whether_pha_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x48u8);
+        assert_eq!(instruction.0, Opcode::PHA);
+        assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
