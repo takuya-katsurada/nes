@@ -33,6 +33,7 @@ pub enum Opcode {
     LDX,
     LDY,
     LSR,
+    NOP,
     ORA,
 }
 
@@ -158,6 +159,7 @@ impl Instruction {
             0xe4 => Instruction(Opcode::CPX, AddressingMode::ZeroPage),
             0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
+            0xea => Instruction(Opcode::NOP, AddressingMode::Implied),
             0xec => Instruction(Opcode::CPX, AddressingMode::Absolute),
             0xee => Instruction(Opcode::INC, AddressingMode::Absolute),
             0xf0 => Instruction(Opcode::BEQ, AddressingMode::Relative),
@@ -554,6 +556,18 @@ mod tests {
                 0x5e => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
+        }
+    }
+
+    #[test]
+    fn whether_nop_instruction_was_created_from_opcode() {
+        // TODO: A decision will be made later as to
+        //       whether the unofficial instruction should be implemented.
+        let opcodes = [0xeau8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::NOP);
+            assert_eq!(instruction.1, AddressingMode::Implied);
         }
     }
 
