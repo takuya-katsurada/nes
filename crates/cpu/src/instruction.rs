@@ -30,6 +30,7 @@ pub enum Opcode {
     JMP,
     JSR,
     LDA,
+    LDX,
     ORA,
 }
 
@@ -108,15 +109,20 @@ impl Instruction {
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
             0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
             0xa1 => Instruction(Opcode::LDA, AddressingMode::IndirectX),
+            0xa2 => Instruction(Opcode::LDX, AddressingMode::Immediate),
             0xa5 => Instruction(Opcode::LDA, AddressingMode::ZeroPage),
+            0xa6 => Instruction(Opcode::LDX, AddressingMode::ZeroPage),
             0xa9 => Instruction(Opcode::LDA, AddressingMode::Immediate),
             0xad => Instruction(Opcode::LDA, AddressingMode::Absolute),
+            0xae => Instruction(Opcode::LDX, AddressingMode::Absolute),
             0xb0 => Instruction(Opcode::BCS, AddressingMode::Relative),
             0xb1 => Instruction(Opcode::LDA, AddressingMode::IndirectY),
             0xb5 => Instruction(Opcode::LDA, AddressingMode::ZeroPageX),
+            0xb6 => Instruction(Opcode::LDX, AddressingMode::ZeroPageY),
             0xb8 => Instruction(Opcode::CLV, AddressingMode::Implied),
             0xb9 => Instruction(Opcode::LDA, AddressingMode::AbsoluteY),
             0xbd => Instruction(Opcode::LDA, AddressingMode::AbsoluteX),
+            0xbe => Instruction(Opcode::LDX, AddressingMode::AbsoluteY),
             0xc0 => Instruction(Opcode::CPY, AddressingMode::Immediate),
             0xc1 => Instruction(Opcode::CMP, AddressingMode::IndirectX),
             0xc4 => Instruction(Opcode::CPY, AddressingMode::ZeroPage),
@@ -483,6 +489,23 @@ mod tests {
                 0xb9 => AddressingMode::AbsoluteY,
                 0xa1 => AddressingMode::IndirectX,
                 0xb1 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_ldx_instruction_was_created_from_opcode() {
+        let opcodes = [0xa2u8,0xa6u8,0xaeu8,0xb6u8,0xbeu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::LDX);
+            assert_eq!(instruction.1, match op {
+                0xa2 => AddressingMode::Immediate,
+                0xa6 => AddressingMode::ZeroPage,
+                0xb6 => AddressingMode::ZeroPageY,
+                0xae => AddressingMode::Absolute,
+                0xbe => AddressingMode::AbsoluteY,
                 _ => panic!("invalid opcode has been specified")
             });
         }
