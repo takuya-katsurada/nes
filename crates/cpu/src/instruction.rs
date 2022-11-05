@@ -39,6 +39,7 @@ pub enum Opcode {
     PHP,
     PLA,
     PLP,
+    ROL,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -85,15 +86,20 @@ impl Instruction {
             0x21 => Instruction(Opcode::AND, AddressingMode::IndirectX),
             0x24 => Instruction(Opcode::BIT, AddressingMode::ZeroPage),
             0x25 => Instruction(Opcode::AND, AddressingMode::ZeroPage),
+            0x26 => Instruction(Opcode::ROL, AddressingMode::ZeroPage),
             0x28 => Instruction(Opcode::PLP, AddressingMode::Implied),
             0x29 => Instruction(Opcode::AND, AddressingMode::Immediate),
+            0x2a => Instruction(Opcode::ROL, AddressingMode::Accumulator),
             0x2c => Instruction(Opcode::BIT, AddressingMode::Absolute),
             0x2d => Instruction(Opcode::AND, AddressingMode::Absolute),
+            0x2e => Instruction(Opcode::ROL, AddressingMode::Absolute),
             0x30 => Instruction(Opcode::BMI, AddressingMode::Relative),
             0x31 => Instruction(Opcode::AND, AddressingMode::IndirectY),
             0x35 => Instruction(Opcode::AND, AddressingMode::ZeroPageX),
+            0x36 => Instruction(Opcode::ROL, AddressingMode::ZeroPageX),
             0x39 => Instruction(Opcode::AND, AddressingMode::AbsoluteY),
             0x3d => Instruction(Opcode::AND, AddressingMode::AbsoluteX),
+            0x3e => Instruction(Opcode::ROL, AddressingMode::AbsoluteX),
             0x41 => Instruction(Opcode::EOR, AddressingMode::IndirectX),
             0x45 => Instruction(Opcode::EOR, AddressingMode::ZeroPage),
             0x46 => Instruction(Opcode::LSR, AddressingMode::ZeroPage),
@@ -625,5 +631,22 @@ mod tests {
         let instruction = Instruction::from(0x28u8);
         assert_eq!(instruction.0, Opcode::PLP);
         assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_rol_instruction_was_created_from_opcode() {
+        let opcodes = [0x26u8,0x2au8,0x2eu8,0x36u8,0x3eu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::ROL);
+            assert_eq!(instruction.1, match op {
+                0x2a => AddressingMode::Accumulator,
+                0x26 => AddressingMode::ZeroPage,
+                0x36 => AddressingMode::ZeroPageX,
+                0x2e => AddressingMode::Absolute,
+                0x3e => AddressingMode::AbsoluteX,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
     }
 }
