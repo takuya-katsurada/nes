@@ -31,6 +31,7 @@ pub enum Opcode {
     JSR,
     LDA,
     LDX,
+    LDY,
     ORA,
 }
 
@@ -108,19 +109,24 @@ impl Instruction {
             0x7d => Instruction(Opcode::ADC, AddressingMode::AbsoluteX),
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
             0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
+            0xa0 => Instruction(Opcode::LDY, AddressingMode::Immediate),
             0xa1 => Instruction(Opcode::LDA, AddressingMode::IndirectX),
             0xa2 => Instruction(Opcode::LDX, AddressingMode::Immediate),
+            0xa4 => Instruction(Opcode::LDY, AddressingMode::ZeroPage),
             0xa5 => Instruction(Opcode::LDA, AddressingMode::ZeroPage),
             0xa6 => Instruction(Opcode::LDX, AddressingMode::ZeroPage),
             0xa9 => Instruction(Opcode::LDA, AddressingMode::Immediate),
+            0xac => Instruction(Opcode::LDY, AddressingMode::Absolute),
             0xad => Instruction(Opcode::LDA, AddressingMode::Absolute),
             0xae => Instruction(Opcode::LDX, AddressingMode::Absolute),
             0xb0 => Instruction(Opcode::BCS, AddressingMode::Relative),
             0xb1 => Instruction(Opcode::LDA, AddressingMode::IndirectY),
+            0xb4 => Instruction(Opcode::LDY, AddressingMode::ZeroPageX),
             0xb5 => Instruction(Opcode::LDA, AddressingMode::ZeroPageX),
             0xb6 => Instruction(Opcode::LDX, AddressingMode::ZeroPageY),
             0xb8 => Instruction(Opcode::CLV, AddressingMode::Implied),
             0xb9 => Instruction(Opcode::LDA, AddressingMode::AbsoluteY),
+            0xbc => Instruction(Opcode::LDY, AddressingMode::AbsoluteX),
             0xbd => Instruction(Opcode::LDA, AddressingMode::AbsoluteX),
             0xbe => Instruction(Opcode::LDX, AddressingMode::AbsoluteY),
             0xc0 => Instruction(Opcode::CPY, AddressingMode::Immediate),
@@ -506,6 +512,23 @@ mod tests {
                 0xb6 => AddressingMode::ZeroPageY,
                 0xae => AddressingMode::Absolute,
                 0xbe => AddressingMode::AbsoluteY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_ldy_instruction_was_created_from_opcode() {
+        let opcodes = [0xa0u8,0xa4u8,0xacu8,0xb4u8,0xbcu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::LDY);
+            assert_eq!(instruction.1, match op {
+                0xa0 => AddressingMode::Immediate,
+                0xa4 => AddressingMode::ZeroPage,
+                0xb4 => AddressingMode::ZeroPageX,
+                0xac => AddressingMode::Absolute,
+                0xbc => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
         }
