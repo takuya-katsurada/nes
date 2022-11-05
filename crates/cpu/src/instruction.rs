@@ -38,6 +38,7 @@ pub enum Opcode {
     PHA,
     PHP,
     PLA,
+    PLP,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -84,6 +85,7 @@ impl Instruction {
             0x21 => Instruction(Opcode::AND, AddressingMode::IndirectX),
             0x24 => Instruction(Opcode::BIT, AddressingMode::ZeroPage),
             0x25 => Instruction(Opcode::AND, AddressingMode::ZeroPage),
+            0x28 => Instruction(Opcode::PLP, AddressingMode::Implied),
             0x29 => Instruction(Opcode::AND, AddressingMode::Immediate),
             0x2c => Instruction(Opcode::BIT, AddressingMode::Absolute),
             0x2d => Instruction(Opcode::AND, AddressingMode::Absolute),
@@ -615,6 +617,13 @@ mod tests {
     fn whether_pla_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x68u8);
         assert_eq!(instruction.0, Opcode::PLA);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_plp_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x28u8);
+        assert_eq!(instruction.0, Opcode::PLP);
         assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
