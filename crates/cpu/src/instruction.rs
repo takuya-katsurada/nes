@@ -41,6 +41,7 @@ pub enum Opcode {
     PLP,
     ROL,
     ROR,
+    RTI,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -101,6 +102,7 @@ impl Instruction {
             0x39 => Instruction(Opcode::AND, AddressingMode::AbsoluteY),
             0x3d => Instruction(Opcode::AND, AddressingMode::AbsoluteX),
             0x3e => Instruction(Opcode::ROL, AddressingMode::AbsoluteX),
+            0x40 => Instruction(Opcode::RTI, AddressingMode::Implied),
             0x41 => Instruction(Opcode::EOR, AddressingMode::IndirectX),
             0x45 => Instruction(Opcode::EOR, AddressingMode::ZeroPage),
             0x46 => Instruction(Opcode::LSR, AddressingMode::ZeroPage),
@@ -671,5 +673,12 @@ mod tests {
                 _ => panic!("invalid opcode has been specified")
             });
         }
+    }
+
+    #[test]
+    fn whether_rti_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x40u8);
+        assert_eq!(instruction.0, Opcode::RTI);
+        assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
