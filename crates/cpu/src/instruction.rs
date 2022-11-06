@@ -51,6 +51,7 @@ pub enum Opcode {
     STX,
     STY,
     TAX,
+    TAY,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -169,6 +170,7 @@ impl Instruction {
             0xa4 => Instruction(Opcode::LDY, AddressingMode::ZeroPage),
             0xa5 => Instruction(Opcode::LDA, AddressingMode::ZeroPage),
             0xa6 => Instruction(Opcode::LDX, AddressingMode::ZeroPage),
+            0xa8 => Instruction(Opcode::TAY, AddressingMode::Implied),
             0xa9 => Instruction(Opcode::LDA, AddressingMode::Immediate),
             0xaa => Instruction(Opcode::TAX, AddressingMode::Implied),
             0xac => Instruction(Opcode::LDY, AddressingMode::Absolute),
@@ -818,6 +820,13 @@ mod tests {
     fn whether_tax_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xaau8);
         assert_eq!(instruction.0, Opcode::TAX);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_tay_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xa8u8);
+        assert_eq!(instruction.0, Opcode::TAY);
         assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
