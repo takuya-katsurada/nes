@@ -44,6 +44,7 @@ pub enum Opcode {
     RTI,
     RTS,
     SBC,
+    SEC,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -101,6 +102,7 @@ impl Instruction {
             0x31 => Instruction(Opcode::AND, AddressingMode::IndirectY),
             0x35 => Instruction(Opcode::AND, AddressingMode::ZeroPageX),
             0x36 => Instruction(Opcode::ROL, AddressingMode::ZeroPageX),
+            0x38 => Instruction(Opcode::SEC, AddressingMode::Implied),
             0x39 => Instruction(Opcode::AND, AddressingMode::AbsoluteY),
             0x3d => Instruction(Opcode::AND, AddressingMode::AbsoluteX),
             0x3e => Instruction(Opcode::ROL, AddressingMode::AbsoluteX),
@@ -718,5 +720,12 @@ mod tests {
                 _ => panic!("invalid opcode has been specified")
             });
         }
+    }
+
+    #[test]
+    fn whether_sec_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x38u8);
+        assert_eq!(instruction.0, Opcode::SEC);
+        assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
