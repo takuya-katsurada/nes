@@ -54,6 +54,10 @@ impl Cpu {
                 self.write_interrupt_flag(false);
                 2
             }
+            Opcode::CLV => {
+                self.write_overflow_flag(false);
+                2
+            }
             Opcode::NOP => {
                 2
             }
@@ -107,6 +111,21 @@ mod tests {
 
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.read_interrupt_flag(), false);
+        assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_clv_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0000u16;
+        cpu.write_overflow_flag(true);
+        mem.write_u8(0x0000, 0xb8u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.read_overflow_flag(), false);
         assert_eq!(cycle, 0x02u8);
     }
 
