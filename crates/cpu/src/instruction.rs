@@ -49,6 +49,7 @@ pub enum Opcode {
     SEI,
     STA,
     STX,
+    STY,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -147,13 +148,16 @@ impl Instruction {
             0x7d => Instruction(Opcode::ADC, AddressingMode::AbsoluteX),
             0x7e => Instruction(Opcode::ROR, AddressingMode::AbsoluteX),
             0x81 => Instruction(Opcode::STA, AddressingMode::IndirectX),
+            0x84 => Instruction(Opcode::STY, AddressingMode::ZeroPage),
             0x85 => Instruction(Opcode::STA, AddressingMode::ZeroPage),
             0x86 => Instruction(Opcode::STX, AddressingMode::ZeroPage),
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
+            0x8c => Instruction(Opcode::STY, AddressingMode::Absolute),
             0x8d => Instruction(Opcode::STA, AddressingMode::Absolute),
             0x8e => Instruction(Opcode::STX, AddressingMode::Absolute),
             0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
             0x91 => Instruction(Opcode::STA, AddressingMode::IndirectY),
+            0x94 => Instruction(Opcode::STY, AddressingMode::ZeroPageX),
             0x95 => Instruction(Opcode::STA, AddressingMode::ZeroPageX),
             0x96 => Instruction(Opcode::STX, AddressingMode::ZeroPageY),
             0x99 => Instruction(Opcode::STA, AddressingMode::AbsoluteY),
@@ -788,6 +792,21 @@ mod tests {
                 0x86 => AddressingMode::ZeroPage,
                 0x96 => AddressingMode::ZeroPageY,
                 0x8e => AddressingMode::Absolute,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_sty_instruction_was_created_from_opcode() {
+        let opcodes = [0x84u8,0x8cu8,0x94u8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::STY);
+            assert_eq!(instruction.1, match op {
+                0x84 => AddressingMode::ZeroPage,
+                0x94 => AddressingMode::ZeroPageX,
+                0x8c => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
         }
