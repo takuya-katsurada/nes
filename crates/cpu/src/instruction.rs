@@ -50,6 +50,7 @@ pub enum Opcode {
     STA,
     STX,
     STY,
+    TAX,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -169,6 +170,7 @@ impl Instruction {
             0xa5 => Instruction(Opcode::LDA, AddressingMode::ZeroPage),
             0xa6 => Instruction(Opcode::LDX, AddressingMode::ZeroPage),
             0xa9 => Instruction(Opcode::LDA, AddressingMode::Immediate),
+            0xaa => Instruction(Opcode::TAX, AddressingMode::Implied),
             0xac => Instruction(Opcode::LDY, AddressingMode::Absolute),
             0xad => Instruction(Opcode::LDA, AddressingMode::Absolute),
             0xae => Instruction(Opcode::LDX, AddressingMode::Absolute),
@@ -810,5 +812,12 @@ mod tests {
                 _ => panic!("invalid opcode has been specified")
             });
         }
+    }
+
+    #[test]
+    fn whether_tax_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xaau8);
+        assert_eq!(instruction.0, Opcode::TAX);
+        assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
