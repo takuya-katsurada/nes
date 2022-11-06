@@ -43,6 +43,7 @@ pub enum Opcode {
     ROR,
     RTI,
     RTS,
+    SBC,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -180,14 +181,22 @@ impl Instruction {
             0xdd => Instruction(Opcode::CMP, AddressingMode::AbsoluteX),
             0xde => Instruction(Opcode::DEC, AddressingMode::AbsoluteX),
             0xe0 => Instruction(Opcode::CPX, AddressingMode::Immediate),
+            0xe1 => Instruction(Opcode::SBC, AddressingMode::IndirectX),
             0xe4 => Instruction(Opcode::CPX, AddressingMode::ZeroPage),
+            0xe5 => Instruction(Opcode::SBC, AddressingMode::ZeroPage),
             0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
             0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
+            0xe9 => Instruction(Opcode::SBC, AddressingMode::Immediate),
             0xea => Instruction(Opcode::NOP, AddressingMode::Implied),
             0xec => Instruction(Opcode::CPX, AddressingMode::Absolute),
+            0xed => Instruction(Opcode::SBC, AddressingMode::Absolute),
             0xee => Instruction(Opcode::INC, AddressingMode::Absolute),
             0xf0 => Instruction(Opcode::BEQ, AddressingMode::Relative),
+            0xf1 => Instruction(Opcode::SBC, AddressingMode::IndirectY),
+            0xf5 => Instruction(Opcode::SBC, AddressingMode::ZeroPageX),
             0xf6 => Instruction(Opcode::INC, AddressingMode::ZeroPageX),
+            0xf9 => Instruction(Opcode::SBC, AddressingMode::AbsoluteY),
+            0xfd => Instruction(Opcode::SBC, AddressingMode::AbsoluteX),
             0xfe => Instruction(Opcode::INC, AddressingMode::AbsoluteX),
 
             _ => panic!("unsupported CPU instruction:{:08x}", opcode),
@@ -689,5 +698,25 @@ mod tests {
         let instruction = Instruction::from(0x60u8);
         assert_eq!(instruction.0, Opcode::RTS);
         assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_sbc_instruction_was_created_from_opcode() {
+        let opcodes = [0xe1u8,0xe5u8,0xe9u8,0xedu8,0xf1u8,0xf5u8,0xf9u8,0xfdu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::SBC);
+            assert_eq!(instruction.1, match op {
+                0xe9 => AddressingMode::Immediate,
+                0xe5 => AddressingMode::ZeroPage,
+                0xf5 => AddressingMode::ZeroPageX,
+                0xed => AddressingMode::Absolute,
+                0xfd => AddressingMode::AbsoluteX,
+                0xf9 => AddressingMode::AbsoluteY,
+                0xe1 => AddressingMode::IndirectX,
+                0xf1 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
     }
 }
