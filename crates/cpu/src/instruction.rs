@@ -48,6 +48,7 @@ pub enum Opcode {
     SED,
     SEI,
     STA,
+    STX,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -147,11 +148,14 @@ impl Instruction {
             0x7e => Instruction(Opcode::ROR, AddressingMode::AbsoluteX),
             0x81 => Instruction(Opcode::STA, AddressingMode::IndirectX),
             0x85 => Instruction(Opcode::STA, AddressingMode::ZeroPage),
+            0x86 => Instruction(Opcode::STX, AddressingMode::ZeroPage),
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
             0x8d => Instruction(Opcode::STA, AddressingMode::Absolute),
+            0x8e => Instruction(Opcode::STX, AddressingMode::Absolute),
             0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
             0x91 => Instruction(Opcode::STA, AddressingMode::IndirectY),
             0x95 => Instruction(Opcode::STA, AddressingMode::ZeroPageX),
+            0x96 => Instruction(Opcode::STX, AddressingMode::ZeroPageY),
             0x99 => Instruction(Opcode::STA, AddressingMode::AbsoluteY),
             0x9d => Instruction(Opcode::STA, AddressingMode::AbsoluteX),
             0xa0 => Instruction(Opcode::LDY, AddressingMode::Immediate),
@@ -769,6 +773,21 @@ mod tests {
                 0x99 => AddressingMode::AbsoluteY,
                 0x81 => AddressingMode::IndirectX,
                 0x91 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
+    }
+
+    #[test]
+    fn whether_stx_instruction_was_created_from_opcode() {
+        let opcodes = [0x86u8,0x8eu8,0x96u8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::STX);
+            assert_eq!(instruction.1, match op {
+                0x86 => AddressingMode::ZeroPage,
+                0x96 => AddressingMode::ZeroPageY,
+                0x8e => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
         }
