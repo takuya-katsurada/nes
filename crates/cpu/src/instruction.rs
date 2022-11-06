@@ -47,6 +47,7 @@ pub enum Opcode {
     SEC,
     SED,
     SEI,
+    STA,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -144,8 +145,15 @@ impl Instruction {
             0x79 => Instruction(Opcode::ADC, AddressingMode::AbsoluteY),
             0x7d => Instruction(Opcode::ADC, AddressingMode::AbsoluteX),
             0x7e => Instruction(Opcode::ROR, AddressingMode::AbsoluteX),
+            0x81 => Instruction(Opcode::STA, AddressingMode::IndirectX),
+            0x85 => Instruction(Opcode::STA, AddressingMode::ZeroPage),
             0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
+            0x8d => Instruction(Opcode::STA, AddressingMode::Absolute),
             0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
+            0x91 => Instruction(Opcode::STA, AddressingMode::IndirectY),
+            0x95 => Instruction(Opcode::STA, AddressingMode::ZeroPageX),
+            0x99 => Instruction(Opcode::STA, AddressingMode::AbsoluteY),
+            0x9d => Instruction(Opcode::STA, AddressingMode::AbsoluteX),
             0xa0 => Instruction(Opcode::LDY, AddressingMode::Immediate),
             0xa1 => Instruction(Opcode::LDA, AddressingMode::IndirectX),
             0xa2 => Instruction(Opcode::LDX, AddressingMode::Immediate),
@@ -745,5 +753,24 @@ mod tests {
         let instruction = Instruction::from(0x78u8);
         assert_eq!(instruction.0, Opcode::SEI);
         assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_sta_instruction_was_created_from_opcode() {
+        let opcodes = [0x81u8,0x85u8,0x8du8,0x91u8,0x95u8,0x99u8,0x9du8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.0, Opcode::STA);
+            assert_eq!(instruction.1, match op {
+                0x85 => AddressingMode::ZeroPage,
+                0x95 => AddressingMode::ZeroPageX,
+                0x8d => AddressingMode::Absolute,
+                0x9d => AddressingMode::AbsoluteX,
+                0x99 => AddressingMode::AbsoluteY,
+                0x81 => AddressingMode::IndirectX,
+                0x91 => AddressingMode::IndirectY,
+                _ => panic!("invalid opcode has been specified")
+            });
+        }
     }
 }
