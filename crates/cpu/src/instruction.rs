@@ -45,6 +45,7 @@ pub enum Opcode {
     RTS,
     SBC,
     SEC,
+    SED,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -197,6 +198,7 @@ impl Instruction {
             0xf1 => Instruction(Opcode::SBC, AddressingMode::IndirectY),
             0xf5 => Instruction(Opcode::SBC, AddressingMode::ZeroPageX),
             0xf6 => Instruction(Opcode::INC, AddressingMode::ZeroPageX),
+            0xf8 => Instruction(Opcode::SED, AddressingMode::Implied),
             0xf9 => Instruction(Opcode::SBC, AddressingMode::AbsoluteY),
             0xfd => Instruction(Opcode::SBC, AddressingMode::AbsoluteX),
             0xfe => Instruction(Opcode::INC, AddressingMode::AbsoluteX),
@@ -726,6 +728,13 @@ mod tests {
     fn whether_sec_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x38u8);
         assert_eq!(instruction.0, Opcode::SEC);
+        assert_eq!(instruction.1, AddressingMode::Implied);
+    }
+
+    #[test]
+    fn whether_sed_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xf8u8);
+        assert_eq!(instruction.0, Opcode::SED);
         assert_eq!(instruction.1, AddressingMode::Implied);
     }
 }
