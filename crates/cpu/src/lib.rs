@@ -65,6 +65,10 @@ impl Cpu {
                 self.write_carry_flag(true);
                 2
             }
+            Opcode::SED => {
+                self.write_decimal_flag(true);
+                2
+            }
             _ => panic!("invalid opcode has been specified")
         }
     }
@@ -157,6 +161,20 @@ mod tests {
 
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.read_carry_flag(), true);
+        assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_sed_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0xf8u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.read_decimal_flag(), true);
         assert_eq!(cycle, 0x02u8);
     }
 }
