@@ -83,6 +83,13 @@ impl Cpu {
                 self.y = self.a;
                 2
             }
+            Opcode::TSX => {
+                let result = (self.sp & 0x00ff) as u8;
+
+                self.check_zero_and_negative_flag(result);
+                self.x = result;
+                2
+            }
 
             _ => panic!("invalid opcode has been specified")
         }
@@ -220,9 +227,9 @@ mod tests {
         let mut mem = memory::Memory::default();
 
         for param in [
-            (0x0f,0x00, false, false),
-            (0x00,0xff, true, false),
-            (0xf0,0x00, false, true),
+            (0x0f, 0x00, false, false),
+            (0x00, 0xff, true, false),
+            (0xf0, 0x00, false, true),
         ] {
             cpu.a  = param.0;
             cpu.x  = param.1;
@@ -245,9 +252,9 @@ mod tests {
         let mut mem = memory::Memory::default();
 
         for param in [
-            (0x0f,0x00, false, false),
-            (0x00,0xff, true, false),
-            (0xf0,0x00, false, true),
+            (0x0f, 0x00, false, false),
+            (0x00, 0xff, true, false),
+            (0xf0, 0x00, false, true),
         ] {
             cpu.a  = param.0;
             cpu.y  = param.1;
@@ -259,6 +266,31 @@ mod tests {
             assert_eq!(cpu.y, param.0);
             assert_eq!(cpu.read_zero_flag(), param.2);
             assert_eq!(cpu.read_negative_flag(), param.3);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_tsx_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x0010, 0x00, 0x10, false, false),
+            (0x0100, 0xff, 0x00, true, false),
+            (0x00f0, 0x00, 0xf0, false, true),
+        ] {
+            cpu.sp = param.0;
+            cpu.x  = param.1;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xbau8);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.sp, param.0);
+            assert_eq!(cpu.x, param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
             assert_eq!(cycle, 0x02u8);
         }
     }
