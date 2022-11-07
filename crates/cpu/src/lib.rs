@@ -69,6 +69,11 @@ impl Cpu {
                 self.write_decimal_flag(true);
                 2
             }
+            Opcode::SEI => {
+                self.write_interrupt_flag(true);
+                2
+            }
+
             _ => panic!("invalid opcode has been specified")
         }
     }
@@ -175,6 +180,20 @@ mod tests {
 
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.read_decimal_flag(), true);
+        assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_sei_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x78u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.read_interrupt_flag(), true);
         assert_eq!(cycle, 0x02u8);
     }
 }
