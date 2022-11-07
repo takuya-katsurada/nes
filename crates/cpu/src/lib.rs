@@ -73,9 +73,20 @@ impl Cpu {
                 self.write_interrupt_flag(true);
                 2
             }
+            Opcode::TAX => {
+                self.check_zero_and_negative_flag(self.a);
+                self.x = self.a;
+                2
+            }
 
             _ => panic!("invalid opcode has been specified")
         }
+    }
+
+    #[inline(always)]
+    fn check_zero_and_negative_flag(&mut self, value: u8) {
+        self.write_zero_flag(value == 0);
+        self.write_negative_flag((value & 0x80) == 0x80);
     }
 }
 
@@ -194,6 +205,23 @@ mod tests {
 
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.read_interrupt_flag(), true);
+        assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_tax_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.a = 0x0f;
+        cpu.x = 0x00;
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0xaau8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.a, 0x0f);
+        assert_eq!(cpu.x, 0x0f);
         assert_eq!(cycle, 0x02u8);
     }
 }
