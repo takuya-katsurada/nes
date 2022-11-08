@@ -95,6 +95,10 @@ impl Cpu {
                 self.a = self.x;
                 2
             }
+            Opcode::TXS => {
+                self.sp = (self.x as u16) | 0x0100u16;
+                2
+            }
 
             _ => panic!("invalid opcode has been specified")
         }
@@ -324,4 +328,20 @@ mod tests {
             assert_eq!(cycle, 0x02u8);
         }
     }
+
+    # [test]
+    fn execute_txs_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.x  = 0x0fu8;
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x9au8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.sp, 0x10fu16);
+        assert_eq!(cycle, 0x02u8);
+    }
+
 }
