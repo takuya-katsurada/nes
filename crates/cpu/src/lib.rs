@@ -90,6 +90,11 @@ impl Cpu {
                 self.x = result;
                 2
             }
+            Opcode::TXA => {
+                self.check_zero_and_negative_flag(self.x);
+                self.a = self.x;
+                2
+            }
 
             _ => panic!("invalid opcode has been specified")
         }
@@ -291,6 +296,31 @@ mod tests {
             assert_eq!(cpu.x, param.2);
             assert_eq!(cpu.read_zero_flag(), param.3);
             assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_txa_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x0f, 0x00, false, false),
+            (0x00, 0xff, true, false),
+            (0xf0, 0x00, false, true),
+        ] {
+            cpu.x  = param.0;
+            cpu.a  = param.1;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x8au8);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.0);
+            assert_eq!(cpu.x, param.0);
+            assert_eq!(cpu.read_zero_flag(), param.2);
+            assert_eq!(cpu.read_negative_flag(), param.3);
             assert_eq!(cycle, 0x02u8);
         }
     }
