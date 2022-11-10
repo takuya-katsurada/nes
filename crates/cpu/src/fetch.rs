@@ -43,6 +43,10 @@ impl Cpu {
                 let address = u16::from(self.fetch_u8(system).wrapping_add(self.y));
                 Operand { address, data: system.read_u8(address), cycle: 3 }
             }
+            AddressingMode::Absolute => {
+                let address = self.fetch_u16(system);
+                Operand { address, data: system.read_u8(address), cycle: 3 }
+            }
 
             _ => panic!("not implemented")
         }
@@ -167,6 +171,23 @@ mod tests {
         assert_eq!(v.data, 0xaau8);
         assert_eq!(v.cycle, 0x0003u16);
         assert_eq!(cpu.pc, 0x0003u16);
+    }
+
+    # [test]
+    fn test_fetch_as_absolute() {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0002u16;
+        mem.write_u8(0x0002u16, 0x42u8);
+        mem.write_u8(0x0003u16, 0x16u8);
+        mem.write_u8(0x1642u16, 0xbbu8);
+
+        let v = cpu.fetch(&mut mem, AddressingMode::Absolute);
+        assert_eq!(v.address, 0x1642u16);
+        assert_eq!(v.data, 0xbbu8);
+        assert_eq!(v.cycle, 0x0003u16);
+        assert_eq!(cpu.pc, 0x0004u16);
     }
 
 }
