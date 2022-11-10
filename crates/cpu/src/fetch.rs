@@ -27,6 +27,10 @@ impl Cpu {
         match mode {
             AddressingMode::Implied => IMPLIED,
             AddressingMode::Accumulator => ACCUMULATOR,
+            AddressingMode::Immediate => {
+                let address = self.pc;
+                Operand { address, data: self.fetch_u8(system), cycle: 1 }
+            }
             _ => panic!("not implemented")
         }
     }
@@ -83,5 +87,20 @@ mod tests {
         assert_eq!(v.address, 0x0000u16);
         assert_eq!(v.data, 0x00u8);
         assert_eq!(v.cycle, 0x0001u16);
+    }
+
+    # [test]
+    fn test_fetch_as_immediate() {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0002u16;
+        mem.write_u8(0x0002u16, 0xffu8);
+
+        let v = cpu.fetch(&mut mem, AddressingMode::Immediate);
+        assert_eq!(v.address, 0x0002u16);
+        assert_eq!(v.data, 0xffu8);
+        assert_eq!(v.cycle, 0x0001u16);
+        assert_eq!(cpu.pc, 0x0003u16);
     }
 }
