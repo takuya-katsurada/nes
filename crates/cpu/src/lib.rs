@@ -65,6 +65,13 @@ impl Cpu {
                 self.x = result;
                 2
             }
+            Opcode::DEY => {
+                let result = self.y.wrapping_sub(1);
+
+                self.check_zero_and_negative_flag(result);
+                self.y = result;
+                2
+            }
             Opcode::INX => {
                 let result = self.x.wrapping_add(1);
 
@@ -217,6 +224,29 @@ mod tests {
 
             let cycle = cpu.step(&mut mem);
             assert_eq!(cpu.x, param.1);
+            assert_eq!(cpu.read_zero_flag(), param.2);
+            assert_eq!(cpu.read_negative_flag(), param.3);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_dey_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x02, 0x01, false, false),
+            (0x01, 0x00, true, false),
+            (0x81, 0x80, false, true),
+        ] {
+            cpu.y  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x88u8);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.y, param.1);
             assert_eq!(cpu.read_zero_flag(), param.2);
             assert_eq!(cpu.read_negative_flag(), param.3);
             assert_eq!(cycle, 0x02u8);
