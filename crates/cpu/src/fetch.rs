@@ -31,6 +31,10 @@ impl Cpu {
                 let address = self.pc;
                 Operand { address, data: self.fetch_u8(system), cycle: 1 }
             }
+            AddressingMode::ZeroPage => {
+                let address = u16::from(self.fetch_u8(system));
+                Operand { address, data: system.read_u8(address), cycle: 2 }
+            }
             _ => panic!("not implemented")
         }
     }
@@ -103,4 +107,21 @@ mod tests {
         assert_eq!(v.cycle, 0x0001u16);
         assert_eq!(cpu.pc, 0x0003u16);
     }
+
+    # [test]
+    fn test_fetch_as_zeropage() {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0002u16;
+        mem.write_u8(0x0002u16, 0x42u8);
+        mem.write_u8(0x0042u16, 0xeeu8);
+
+        let v = cpu.fetch(&mut mem, AddressingMode::ZeroPage);
+        assert_eq!(v.address, 0x0042u16);
+        assert_eq!(v.data, 0xeeu8);
+        assert_eq!(v.cycle, 0x0002u16);
+        assert_eq!(cpu.pc, 0x0003u16);
+    }
+
 }
