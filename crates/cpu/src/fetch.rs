@@ -8,6 +8,7 @@ pub struct Operand {
     cycle: u16,
 }
 const IMPLIED: Operand = Operand { address: 0, data: 0, cycle: 0 };
+const ACCUMULATOR: Operand = Operand { address: 0, data: 0, cycle: 1 };
 
 impl Cpu {
     pub(crate) fn fetch_u8(&mut self, system: &mut memory::system::SystemBus) -> u8 {
@@ -25,6 +26,7 @@ impl Cpu {
     pub(crate) fn fetch(&mut self, system: &mut memory::system::SystemBus, mode : AddressingMode) -> Operand {
         match mode {
             AddressingMode::Implied => IMPLIED,
+            AddressingMode::Accumulator => ACCUMULATOR,
             _ => panic!("not implemented")
         }
     }
@@ -70,5 +72,16 @@ mod tests {
         assert_eq!(v.address, 0x0000u16);
         assert_eq!(v.data, 0x00u8);
         assert_eq!(v.cycle, 0x0000u16);
+    }
+
+    # [test]
+    fn test_fetch_as_accumulator() {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        let v = cpu.fetch(&mut mem, AddressingMode::Accumulator);
+        assert_eq!(v.address, 0x0000u16);
+        assert_eq!(v.data, 0x00u8);
+        assert_eq!(v.cycle, 0x0001u16);
     }
 }
