@@ -57,6 +57,16 @@ impl Cpu {
                     };
                 Operand { address, data: system.read_u8(address), cycle: 3 + additional_cycle }
             }
+            AddressingMode::AbsoluteY => {
+                let address = self.fetch_u16(system).wrapping_add(u16::from(self.y));
+                let additional_cycle =
+                    if (address & 0xff00u16) != (address.wrapping_add(u16::from(self.y)) & 0xff00u16) {
+                        1
+                    } else {
+                        0
+                    };
+                Operand { address, data: system.read_u8(address), cycle: 3 + additional_cycle }
+            }
 
             _ => panic!("not implemented")
         }
@@ -210,7 +220,7 @@ mod tests {
         mem.write_u8(0x1642u16, 0xbbu8);
         mem.write_u8(0x1647u16, 0xddu8);
         mem.write_u8(0x16dcu16, 0xeeu8);
-        
+
         for param in [
             (0x05u8, 0x1647u16, 0xddu8, 0x0003u16),
             (0x9au8, 0x16dcu16, 0xeeu8, 0x0004u16),
@@ -219,6 +229,32 @@ mod tests {
             cpu.pc = 0x0002u16;
 
             let v = cpu.fetch(&mut mem, AddressingMode::AbsoluteX);
+            assert_eq!(v.address, param.1);
+            assert_eq!(v.data, param.2);
+            assert_eq!(v.cycle, param.3);
+            assert_eq!(cpu.pc, 0x0004u16);
+        }
+    }
+
+    # [test]
+    fn test_fetch_as_absolute_y() {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        mem.write_u8(0x0002u16, 0x42u8);
+        mem.write_u8(0x0003u16, 0x16u8);
+        mem.write_u8(0x1642u16, 0xbbu8);
+        mem.write_u8(0x1647u16, 0xddu8);
+        mem.write_u8(0x16dcu16, 0xeeu8);
+
+        for param in [
+            (0x05u8, 0x1647u16, 0xddu8, 0x0003u16),
+            (0x9au8, 0x16dcu16, 0xeeu8, 0x0004u16),
+        ] {
+            cpu.y = param.0;
+            cpu.pc = 0x0002u16;
+
+            let v = cpu.fetch(&mut mem, AddressingMode::AbsoluteY);
             assert_eq!(v.address, param.1);
             assert_eq!(v.data, param.2);
             assert_eq!(v.cycle, param.3);
