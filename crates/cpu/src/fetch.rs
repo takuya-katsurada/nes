@@ -3,9 +3,9 @@ use crate::instruction::AddressingMode;
 
 #[derive(Copy, Clone, Debug)]
 pub struct Operand {
-    address: u16,
-    data: u8,
-    cycle: u16,
+    pub address: u16,
+    pub data: u8,
+    pub cycle: u8,
 }
 const IMPLIED: Operand = Operand { address: 0, data: 0, cycle: 0 };
 const ACCUMULATOR: Operand = Operand { address: 0, data: 0, cycle: 1 };
@@ -153,7 +153,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::Implied);
         assert_eq!(v.address, 0x0000u16);
         assert_eq!(v.data, 0x00u8);
-        assert_eq!(v.cycle, 0x0000u16);
+        assert_eq!(v.cycle, 0x00u8);
     }
 
     # [test]
@@ -164,7 +164,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::Accumulator);
         assert_eq!(v.address, 0x0000u16);
         assert_eq!(v.data, 0x00u8);
-        assert_eq!(v.cycle, 0x0001u16);
+        assert_eq!(v.cycle, 0x01u8);
     }
 
     # [test]
@@ -178,7 +178,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::Immediate);
         assert_eq!(v.address, 0x0002u16);
         assert_eq!(v.data, 0xffu8);
-        assert_eq!(v.cycle, 0x0001u16);
+        assert_eq!(v.cycle, 0x01u8);
         assert_eq!(cpu.pc, 0x0003u16);
     }
 
@@ -194,7 +194,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::ZeroPage);
         assert_eq!(v.address, 0x0042u16);
         assert_eq!(v.data, 0xeeu8);
-        assert_eq!(v.cycle, 0x0002u16);
+        assert_eq!(v.cycle, 0x02u8);
         assert_eq!(cpu.pc, 0x0003u16);
     }
 
@@ -212,7 +212,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::ZeroPageX);
         assert_eq!(v.address, 0x0045u16);
         assert_eq!(v.data, 0xaau8);
-        assert_eq!(v.cycle, 0x0003u16);
+        assert_eq!(v.cycle, 0x03u8);
         assert_eq!(cpu.pc, 0x0003u16);
     }
 
@@ -230,7 +230,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::ZeroPageY);
         assert_eq!(v.address, 0x0045u16);
         assert_eq!(v.data, 0xaau8);
-        assert_eq!(v.cycle, 0x0003u16);
+        assert_eq!(v.cycle, 0x03u8);
         assert_eq!(cpu.pc, 0x0003u16);
     }
 
@@ -247,7 +247,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::Absolute);
         assert_eq!(v.address, 0x1642u16);
         assert_eq!(v.data, 0xbbu8);
-        assert_eq!(v.cycle, 0x0003u16);
+        assert_eq!(v.cycle, 0x03u8);
         assert_eq!(cpu.pc, 0x0004u16);
     }
 
@@ -263,8 +263,8 @@ mod tests {
         mem.write_u8(0x16dcu16, 0xeeu8);
 
         for param in [
-            (0x05u8, 0x1647u16, 0xddu8, 0x0003u16),
-            (0x9au8, 0x16dcu16, 0xeeu8, 0x0004u16),
+            (0x05u8, 0x1647u16, 0xddu8, 0x03u8),
+            (0x9au8, 0x16dcu16, 0xeeu8, 0x04u8),
         ] {
             cpu.x = param.0;
             cpu.pc = 0x0002u16;
@@ -289,8 +289,8 @@ mod tests {
         mem.write_u8(0x16dcu16, 0xeeu8);
 
         for param in [
-            (0x05u8, 0x1647u16, 0xddu8, 0x0003u16),
-            (0x9au8, 0x16dcu16, 0xeeu8, 0x0004u16),
+            (0x05u8, 0x1647u16, 0xddu8, 0x03u8),
+            (0x9au8, 0x16dcu16, 0xeeu8, 0x04u8),
         ] {
             cpu.y = param.0;
             cpu.pc = 0x0002u16;
@@ -318,7 +318,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::Indirect);
         assert_eq!(v.address, 0x1234u16);
         assert_eq!(v.data, 0x88u8);
-        assert_eq!(v.cycle, 5);
+        assert_eq!(v.cycle, 0x05u8);
         assert_eq!(cpu.pc, 0x0004u16);
     }
 
@@ -337,7 +337,7 @@ mod tests {
         let v = cpu.fetch(&mut mem, AddressingMode::IndirectX);
         assert_eq!(v.address, 0x1234u16);
         assert_eq!(v.data, 0x66u8);
-        assert_eq!(v.cycle, 5);
+        assert_eq!(v.cycle, 0x05u8);
         assert_eq!(cpu.pc, 0x0003u16);
     }
 
@@ -353,8 +353,8 @@ mod tests {
         mem.write_u8(0x027fu16, 0xbbu8);
 
         for param in [
-            (0x01u8, 0x0181u16, 0xaau8, 0x0004u16),
-            (0xffu8, 0x027fu16, 0xbbu8, 0x0005u16),
+            (0x01u8, 0x0181u16, 0xaau8, 0x04u8),
+            (0xffu8, 0x027fu16, 0xbbu8, 0x05u8),
         ] {
             cpu.y = param.0;
             cpu.pc = 0x0002u16;
