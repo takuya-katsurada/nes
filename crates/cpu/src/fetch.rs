@@ -349,7 +349,6 @@ mod tests {
         mem.write_u8(0x0000u16, 0x01u8);
         mem.write_u8(0x0002u16, 0xffu8);
         mem.write_u8(0x00ffu16, 0x80u8);
-
         mem.write_u8(0x0181u16, 0xaau8);
         mem.write_u8(0x027fu16, 0xbbu8);
 
