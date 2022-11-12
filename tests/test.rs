@@ -5,6 +5,7 @@ mod tests {
     use std::io::Read;
 
     #[test]
+    #[ignore]
     fn load_rom() -> std::io::Result<()> {
         let mut file = File::open("roms/nes-test-roms/other/demo.nes")?;
         let mut contents = vec![];
