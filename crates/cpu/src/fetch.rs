@@ -82,6 +82,16 @@ impl Cpu {
                 let address = lo | hi << 8;
                 Operand { address, data: system.read_u8(address), cycle: 5 }
             }
+            AddressingMode::IndirectX => {
+                // 6502 bug, so the low byte is not wrapped and the high byte is not incremented.
+                let s = self.fetch_u8(system).wrapping_add(self.x);
+
+                let lo = u16::from(system.read_u8(u16::from(s)));
+                let hi = u16::from(system.read_u8(u16::from(s.wrapping_add(1))));
+
+                let address = lo | hi << 8;
+                Operand { address, data: system.read_u8(address), cycle: 5 }
+            }
 
             _ => panic!("not implemented")
         }
@@ -294,5 +304,24 @@ mod tests {
         assert_eq!(v.data, 0x88u8);
         assert_eq!(v.cycle, 5);
         assert_eq!(cpu.pc, 0x0004u16);
+    }
+
+    # [test]
+    fn test_fetch_as_indirect_x() {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        mem.write_u8(0x0000u16, 0x12u8);
+        mem.write_u8(0x0002u16, 0xfeu8);
+        mem.write_u8(0x00ffu16, 0x34u8);
+        mem.write_u8(0x1234u16, 0x66u8);
+
+        cpu.x  = 0x01u8;
+        cpu.pc = 0x0002u16;
+        let v = cpu.fetch(&mut mem, AddressingMode::IndirectX);
+        assert_eq!(v.address, 0x1234u16);
+        assert_eq!(v.data, 0x66u8);
+        assert_eq!(v.cycle, 5);
+        assert_eq!(cpu.pc, 0x0003u16);
     }
 }
