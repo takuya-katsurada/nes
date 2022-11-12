@@ -7,8 +7,10 @@ edition = "2018"
 members = [
   "crates/cpu",
   "crates/memory",
+  "crates/rom",
 ]
 
 [dependencies]
 cpu = { path = "crates/cpu" }
 memory = { path = "crates/memory" }
+rom = { path = "crates/rom" }
