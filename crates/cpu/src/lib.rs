@@ -97,6 +97,14 @@ impl Cpu {
             Opcode::NOP => {
                 2
             }
+            Opcode::ORA => {
+                let operand = self.fetch(system, mode);
+                let result = self.a | operand.data;
+
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                1 + operand.cycle
+            }
             Opcode::SEC => {
                 self.write_carry_flag(true);
                 2
@@ -343,6 +351,30 @@ mod tests {
 
         let cycle = cpu.step(&mut mem);
         assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_ora_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x08, 0x07, 0x0f, false, false),
+            (0x00, 0x00, 0x00, true, false),
+            (0x0f, 0x80, 0x8f, false, true),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x09);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x02u8);
+        }
     }
 
     # [test]
