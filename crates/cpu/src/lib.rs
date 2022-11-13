@@ -110,6 +110,14 @@ impl Cpu {
                 self.a = result;
                 1 + operand.cycle
             }
+            Opcode::LDX => {
+                let operand = self.fetch(system, mode);
+                let result = operand.data;
+
+                self.check_zero_and_negative_flag(result);
+                self.x = result;
+                1 + operand.cycle
+            }
             Opcode::NOP => {
                 2
             }
@@ -397,6 +405,30 @@ mod tests {
 
             let cycle = cpu.step(&mut mem);
             assert_eq!(cpu.a, param.1);
+            assert_eq!(cpu.read_zero_flag(), param.2);
+            assert_eq!(cpu.read_negative_flag(), param.3);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_ldx_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x00, 0x01, false, false),
+            (0x01, 0x00, true, false),
+            (0x00, 0x80, false, true),
+        ] {
+            cpu.x  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xa2u8);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.x, param.1);
             assert_eq!(cpu.read_zero_flag(), param.2);
             assert_eq!(cpu.read_negative_flag(), param.3);
             assert_eq!(cycle, 0x02u8);
