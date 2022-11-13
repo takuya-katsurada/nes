@@ -155,6 +155,12 @@ impl Cpu {
                 system.write_u8(operand.address, self.a);
                 1 + operand.cycle
             }
+            Opcode::STX => {
+                let operand = self.fetch(system, mode);
+
+                system.write_u8(operand.address, self.x);
+                1 + operand.cycle
+            }
             Opcode::TAX => {
                 self.check_zero_and_negative_flag(self.a);
                 self.x = self.a;
@@ -561,6 +567,23 @@ mod tests {
         cpu.a  = 0xffu8;
         cpu.pc = 0x0000u16;
         mem.write_u8(0x0000, 0x85u8);
+        mem.write_u8(0x0001, 0x02u8);
+        mem.write_u8(0x0002, 0x0fu8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(mem.read_u8(0x0002), 0xffu8);
+        assert_eq!(cycle, 0x03u8);
+    }
+
+    # [test]
+    fn execute_stx_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.x  = 0xffu8;
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x86u8);
         mem.write_u8(0x0001, 0x02u8);
         mem.write_u8(0x0002, 0x0fu8);
 
