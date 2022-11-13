@@ -1,4 +1,4 @@
-
+#[cfg(test)]
 mod tests {
     use rom::Rom;
     use std::fs::File;

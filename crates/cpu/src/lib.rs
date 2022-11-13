@@ -37,7 +37,7 @@ impl Default for Cpu {
 }
 
 impl Cpu {
-    pub fn step(&mut self, system: &mut memory::system::SystemBus) -> u8 {
+    pub fn step(&mut self, system: &mut dyn memory::system::SystemBus) -> u8 {
         let raw_opcode = self.fetch_u8(system);
         let Instruction(opcode, mode) = Instruction::from(raw_opcode);
 
@@ -210,6 +210,7 @@ impl Cpu {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use memory::system::SystemBus;
 

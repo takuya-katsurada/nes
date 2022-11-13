@@ -11,20 +11,20 @@ const IMPLIED: Operand = Operand { address: 0, data: 0, cycle: 0 };
 const ACCUMULATOR: Operand = Operand { address: 0, data: 0, cycle: 1 };
 
 impl Cpu {
-    pub(crate) fn fetch_u8(&mut self, system: &mut memory::system::SystemBus) -> u8 {
+    pub(crate) fn fetch_u8(&mut self, system: &mut dyn memory::system::SystemBus) -> u8 {
         let v = system.read_u8(self.pc);
         self.pc += 1;
         v
     }
 
-    pub(crate) fn fetch_u16(&mut self, system: &mut memory::system::SystemBus) -> u16 {
+    pub(crate) fn fetch_u16(&mut self, system: &mut dyn memory::system::SystemBus) -> u16 {
         let lo = self.fetch_u8(system);
         let hi = self.fetch_u8(system);
         u16::from(lo) | (u16::from(hi) << 8)
     }
 
 
-    pub(crate) fn fetch(&mut self, system: &mut memory::system::SystemBus, mode : AddressingMode) -> Operand {
+    pub(crate) fn fetch(&mut self, system: &mut dyn memory::system::SystemBus, mode : AddressingMode) -> Operand {
         match mode {
             AddressingMode::Implied => IMPLIED,
             AddressingMode::Accumulator => ACCUMULATOR,
