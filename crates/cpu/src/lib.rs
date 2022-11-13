@@ -149,6 +149,12 @@ impl Cpu {
                 self.write_interrupt_flag(true);
                 2
             }
+            Opcode::STA => {
+                let operand = self.fetch(system, mode);
+
+                system.write_u8(operand.address, self.a);
+                1 + operand.cycle
+            }
             Opcode::TAX => {
                 self.check_zero_and_negative_flag(self.a);
                 self.x = self.a;
@@ -544,6 +550,23 @@ mod tests {
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.read_interrupt_flag(), true);
         assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_sta_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.a  = 0xffu8;
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x85u8);
+        mem.write_u8(0x0001, 0x02u8);
+        mem.write_u8(0x0002, 0x0fu8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(mem.read_u8(0x0002), 0xffu8);
+        assert_eq!(cycle, 0x03u8);
     }
 
     # [test]
