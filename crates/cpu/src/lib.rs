@@ -88,6 +88,14 @@ impl Cpu {
                 self.a = result;
                 1 + operand.cycle
             }
+            Opcode::INC => {
+                let operand = self.fetch(system, mode);
+                let result = operand.data.wrapping_add(1);
+
+                self.check_zero_and_negative_flag(result);
+                system.write_u8(operand.address, result);
+                3 + operand.cycle
+            }
             Opcode::INX => {
                 let result = self.x.wrapping_add(1);
 
@@ -365,6 +373,30 @@ mod tests {
             assert_eq!(cpu.read_zero_flag(), param.3);
             assert_eq!(cpu.read_negative_flag(), param.4);
             assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_inc_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x00, 0x01, false, false),
+            (0xff, 0x00, true, false),
+            (0x7f, 0x80, false, true),
+        ] {
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xe6);
+            mem.write_u8(0x0001, 0x0002);
+            mem.write_u8(0x0002, param.0);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(mem.read_u8(0x0002), param.1);
+            assert_eq!(cpu.read_zero_flag(), param.2);
+            assert_eq!(cpu.read_negative_flag(), param.3);
+            assert_eq!(cycle, 0x05u8);
         }
     }
 
