@@ -66,6 +66,14 @@ impl Cpu {
                 self.write_overflow_flag(false);
                 2
             }
+            Opcode::DEC => {
+                let operand = self.fetch(system, mode);
+                let result = operand.data.wrapping_sub(1);
+
+                self.check_zero_and_negative_flag(result);
+                system.write_u8(operand.address, result);
+                3 + operand.cycle
+            }
             Opcode::DEX => {
                 let result = self.x.wrapping_sub(1);
 
@@ -304,6 +312,30 @@ mod tests {
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.read_overflow_flag(), false);
         assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_dec_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x02, 0x01, false, false),
+            (0x01, 0x00, true, false),
+            (0x81, 0x80, false, true),
+        ] {
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xc6);
+            mem.write_u8(0x0001, 0x0002);
+            mem.write_u8(0x0002, param.0);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(mem.read_u8(0x0002), param.1);
+            assert_eq!(cpu.read_zero_flag(), param.2);
+            assert_eq!(cpu.read_negative_flag(), param.3);
+            assert_eq!(cycle, 0x05u8);
+        }
     }
 
     # [test]
