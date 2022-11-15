@@ -74,6 +74,14 @@ impl Cpu {
                 self.check_zero_and_negative_flag(result);
                 1 + operand.cycle
             }
+            Opcode::CPY => {
+                let operand = self.fetch(system, mode);
+                let (result, _) = self.y.overflowing_sub(operand.data);
+
+                self.write_carry_flag(self.y > result);
+                self.check_zero_and_negative_flag(result);
+                1 + operand.cycle
+            }
             Opcode::DEC => {
                 let operand = self.fetch(system, mode);
                 let result = operand.data.wrapping_sub(1);
@@ -336,6 +344,30 @@ mod tests {
             cpu.x  = param.0;
             cpu.pc = 0x0000u16;
             mem.write_u8(0x0000, 0xe0u8);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.read_carry_flag(), param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_cpy_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x01, 0x02, false, false, true),
+            (0x01, 0x01, true, true, false),
+            (0x02, 0x01, true, false, false),
+        ] {
+            cpu.y  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xc0u8);
             mem.write_u8(0x0001, param.1);
 
             let cycle = cpu.step(&mut mem);
