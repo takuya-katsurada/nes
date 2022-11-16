@@ -66,6 +66,14 @@ impl Cpu {
                 self.write_overflow_flag(false);
                 2
             }
+            Opcode::CMP => {
+                let operand = self.fetch(system, mode);
+                let (result, _) = self.a.overflowing_sub(operand.data);
+
+                self.write_carry_flag(self.a > result);
+                self.check_zero_and_negative_flag(result);
+                1 + operand.cycle
+            }
             Opcode::CPX => {
                 let operand = self.fetch(system, mode);
                 let (result, _) = self.x.overflowing_sub(operand.data);
@@ -328,6 +336,30 @@ mod tests {
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.read_overflow_flag(), false);
         assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_cmp_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x01, 0x02, false, false, true),
+            (0x01, 0x01, true, true, false),
+            (0x02, 0x01, true, false, false),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xc9u8);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.read_carry_flag(), param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x02u8);
+        }
     }
 
     # [test]
