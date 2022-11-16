@@ -318,6 +318,9 @@ mod tests {
 
         for param in [
             (0x01, 0x02, false, false, false),
+            (0x00, 0x00, false, true, false),
+            (0x40, 0x80, false, false, true),
+            (0x81, 0x02, true, false, false),
         ]{
             cpu.pc = 0x0000u16;
             mem.write_u8(0x0000, 0x06);
