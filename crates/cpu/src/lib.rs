@@ -180,6 +180,20 @@ impl Cpu {
                 self.y = result;
                 1 + operand.cycle
             }
+            Opcode::LSR => {
+                let operand = self.fetch(system, mode);
+                let result = operand.data.wrapping_shr(1);
+
+                self.write_carry_flag((operand.data & 0x01) == 0x01);
+                self.check_zero_and_negative_flag(result);
+                if mode == AddressingMode::Accumulator {
+                    self.a = result;
+                    1 + operand.cycle
+                } else {
+                    system.write_u8(operand.address, result);
+                    3 + operand.cycle
+                }
+            }
             Opcode::NOP => {
                 2
             }
@@ -336,7 +350,6 @@ mod tests {
 
         }
     }
-
 
     # [test]
     fn execute_clc_instruction()
@@ -703,6 +716,47 @@ mod tests {
             assert_eq!(cpu.read_zero_flag(), param.2);
             assert_eq!(cpu.read_negative_flag(), param.3);
             assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_lsr_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x02, 0x01, false, false, false),
+            (0x01, 0x00, true, true, false),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x4a);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.1);
+            assert_eq!(cpu.read_carry_flag(), param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x02u8);
+        }
+
+        for param in [
+            (0x02, 0x01, false, false, false),
+            (0x01, 0x00, true, true, false),
+        ]{
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x46);
+            mem.write_u8(0x0001, 0x0f);
+            mem.write_u8(0x000f, param.0);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(mem.read_u8(0x000f), param.1);
+            assert_eq!(cpu.read_carry_flag(), param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x05u8);
+
         }
     }
 
