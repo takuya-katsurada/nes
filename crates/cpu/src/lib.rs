@@ -50,6 +50,20 @@ impl Cpu {
                 self.a = result;
                 1 + operand.cycle
             }
+            Opcode::ASL => {
+                let operand = self.fetch(system, mode);
+                let result = operand.data.wrapping_shl(1);
+
+                self.write_carry_flag((operand.data & 0x80) == 0x80);
+                self.check_zero_and_negative_flag(result);
+                if mode == AddressingMode::Accumulator {
+                    self.a = result;
+                    1 + operand.cycle
+                } else {
+                    system.write_u8(operand.address, result);
+                    3 + operand.cycle
+                }
+            }
             Opcode::CLC => {
                 self.write_carry_flag(false);
                 2
@@ -277,6 +291,49 @@ mod tests {
             assert_eq!(cycle, 0x02u8);
         }
     }
+
+    # [test]
+    fn execute_asl_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x01, 0x02, false, false, false),
+            (0x00, 0x00, false, true, false),
+            (0x40, 0x80, false, false, true),
+            (0x81, 0x02, true, false, false),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x0a);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.1);
+            assert_eq!(cpu.read_carry_flag(), param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x02u8);
+        }
+
+        for param in [
+            (0x01, 0x02, false, false, false),
+        ]{
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x06);
+            mem.write_u8(0x0001, 0x0f);
+            mem.write_u8(0x000f, param.0);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(mem.read_u8(0x000f), param.1);
+            assert_eq!(cpu.read_carry_flag(), param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x05u8);
+
+        }
+    }
+
 
     # [test]
     fn execute_clc_instruction()
