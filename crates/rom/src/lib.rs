@@ -2,6 +2,7 @@
 use std::io::Read;
 use std::error::Error;
 
+#[derive(Clone)]
 pub struct Rom {
     pub prg_rom_bytes: usize,
     pub chr_rom_bytes: usize,
