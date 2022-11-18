@@ -156,6 +156,11 @@ impl Cpu {
                 self.y = result;
                 2
             }
+            Opcode::JMP => {
+                let operand = self.fetch(system, mode);
+                self.pc = operand.address;
+                operand.cycle
+            }
             Opcode::LDA => {
                 let operand = self.fetch(system, mode);
                 let result = operand.data;
@@ -678,6 +683,23 @@ mod tests {
             assert_eq!(cpu.read_negative_flag(), param.3);
             assert_eq!(cycle, 0x02u8);
         }
+    }
+
+    # [test]
+    fn execute_jmp_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x4cu8);
+        mem.write_u8(0x0001, 0x34u8);
+        mem.write_u8(0x0002, 0x12u8);
+        mem.write_u8(0x1234, 0xffu8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.pc, 0x1234);
+        assert_eq!(cycle, 0x03u8);
     }
 
     # [test]
