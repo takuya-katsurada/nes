@@ -214,6 +214,13 @@ impl Cpu {
                 self.stack_push(system, self.a);
                 3
             }
+            Opcode::PLA => {
+                let result = self.stack_pop(system);
+
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                4
+            }
             Opcode::ROL => {
                 let operand = self.fetch(system, mode);
                 let result = operand.data.wrapping_shl(1) | (
@@ -871,6 +878,24 @@ mod tests {
         assert_eq!(mem.read_u8(0xff), 0x80u8);
         assert_eq!(cpu.sp, 0x00fe);
         assert_eq!(cycle, 0x03u8);
+    }
+
+    # [test]
+    fn execute_pla_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.a  = 0x00u8;
+        cpu.pc = 0x0000u16;
+        cpu.sp = 0x00feu16;
+        mem.write_u8(0x0000, 0x68u8);
+        mem.write_u8(0x00ff, 0x90u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.a, 0x90u8);
+        assert_eq!(cpu.sp, 0x00ffu16);
+        assert_eq!(cycle, 0x04u8);
     }
 
     # [test]
