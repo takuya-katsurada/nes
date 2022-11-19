@@ -22,7 +22,6 @@ impl Cpu {
         u16::from(lo) | (u16::from(hi) << 8)
     }
 
-
     pub(crate) fn fetch(&mut self, system: &mut dyn memory::system::SystemBus, mode : AddressingMode) -> Operand {
         match mode {
             AddressingMode::Implied => IMPLIED,
@@ -112,6 +111,16 @@ impl Cpu {
 
             _ => panic!("not implemented")
         }
+    }
+
+    pub(crate) fn stack_push(&mut self, system: &mut dyn memory::system::SystemBus, data: u8) {
+        system.write_u8(self.sp, data);
+        self.sp = self.sp - 1;
+    }
+
+    pub(crate) fn stack_pop(&mut self, system: &mut dyn memory::system::SystemBus) -> u8 {
+        self.sp = self.sp + 1;
+        system.read_u8(self.sp)
     }
 }
 
@@ -367,5 +376,17 @@ mod tests {
             assert_eq!(v.cycle, param.3);
             assert_eq!(cpu.pc, 0x0003u16);
         }
+    }
+
+    # [test]
+    fn test_stack_push_and_pop() {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.sp = 0xff;
+        cpu.stack_push(&mut mem, 0x80u8);
+        assert_eq!(cpu.sp, 0xfe);
+        assert_eq!(cpu.stack_pop(&mut mem), 0x80u8);
+        assert_eq!(cpu.sp, 0xff);
     }
 }
