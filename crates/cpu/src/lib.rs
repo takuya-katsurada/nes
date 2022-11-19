@@ -210,6 +210,10 @@ impl Cpu {
                 self.a = result;
                 1 + operand.cycle
             }
+            Opcode::PHA => {
+                self.stack_push(system, self.a);
+                3
+            }
             Opcode::ROL => {
                 let operand = self.fetch(system, mode);
                 let result = operand.data.wrapping_shl(1) | (
@@ -850,6 +854,23 @@ mod tests {
             assert_eq!(cpu.read_negative_flag(), param.4);
             assert_eq!(cycle, 0x02u8);
         }
+    }
+
+    # [test]
+    fn execute_pha_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.a  = 0x80u8;
+        cpu.pc = 0x0000u16;
+        cpu.sp = 0x00ffu16;
+        mem.write_u8(0x0000, 0x48u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(mem.read_u8(0xff), 0x80u8);
+        assert_eq!(cpu.sp, 0x00fe);
+        assert_eq!(cycle, 0x03u8);
     }
 
     # [test]
