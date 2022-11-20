@@ -912,16 +912,24 @@ mod tests {
         let mut cpu = super::Cpu::default();
         let mut mem = memory::Memory::default();
 
-        cpu.a  = 0x00u8;
-        cpu.pc = 0x0000u16;
-        cpu.sp = 0x00feu16;
-        mem.write_u8(0x0000, 0x68u8);
-        mem.write_u8(0x00ff, 0x90u8);
+        for param in [
+            (0x01, false, false),
+            (0x00, true, false),
+            (0x80, false, true),
+        ] {
+            cpu.a = 0x00u8;
+            cpu.pc = 0x0000u16;
+            cpu.sp = 0x00feu16;
+            mem.write_u8(0x0000, 0x68u8);
+            mem.write_u8(0x00ff, param.0);
 
-        let cycle = cpu.step(&mut mem);
-        assert_eq!(cpu.a, 0x90u8);
-        assert_eq!(cpu.sp, 0x00ffu16);
-        assert_eq!(cycle, 0x04u8);
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.0);
+            assert_eq!(cpu.sp, 0x00ffu16);
+            assert_eq!(cpu.read_zero_flag(), param.1);
+            assert_eq!(cpu.read_negative_flag(), param.2);
+            assert_eq!(cycle, 0x04u8);
+        }
     }
 
     # [test]
