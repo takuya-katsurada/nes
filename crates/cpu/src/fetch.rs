@@ -108,8 +108,18 @@ impl Cpu {
                 };
                 Operand { address, data: system.read_u8(address), cycle: 4 + additional_cycle }
             }
+            AddressingMode::Relative => {
+                let v = i32::from(self.fetch_u8(system)) + (self.pc as i32);
+                debug_assert!(0x0 <= v && v < 0x10000);
 
-            _ => panic!("not implemented")
+                let address = v as u16;
+                let additional_cycle = if (address & 0xff00u16) != (self.pc & 0xff00u16) {
+                    1
+                } else {
+                    0
+                };
+                Operand { address, data: system.read_u8(address), cycle: 1 + additional_cycle }
+            }
         }
     }
 
@@ -375,6 +385,29 @@ mod tests {
             assert_eq!(v.data, param.2);
             assert_eq!(v.cycle, param.3);
             assert_eq!(cpu.pc, 0x0003u16);
+        }
+    }
+
+    # [test]
+    fn test_fetch_as_relative() {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+        
+        mem.write_u8(0x0000u16, 0x80u8);
+        mem.write_u8(0x0081u16, 0xffu8);
+        mem.write_u8(0x00feu16, 0xffu8);
+        mem.write_u8(0x01feu16, 0xaau8);
+        for param in [
+            (0x0000u16, 0x0081u16, 0xffu8, 0x01u8),
+            (0x00feu16, 0x01feu16, 0xaau8, 0x02u8),
+        ] {
+            cpu.pc = param.0;
+
+            let v = cpu.fetch(&mut mem, AddressingMode::Relative);
+            assert_eq!(v.address, param.1);
+            assert_eq!(v.data, param.2);
+            assert_eq!(v.cycle, param.3);
+            assert_eq!(cpu.pc, param.0 + 1);
         }
     }
 
