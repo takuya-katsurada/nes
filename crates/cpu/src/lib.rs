@@ -225,6 +225,11 @@ impl Cpu {
                 self.a = result;
                 4
             }
+            Opcode::PLP => {
+                let result = self.stack_pop(system);
+                self.p = result;
+                4
+            }
             Opcode::ROL => {
                 let operand = self.fetch(system, mode);
                 let result = operand.data.wrapping_shl(1) | (
@@ -915,6 +920,24 @@ mod tests {
 
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.a, 0x90u8);
+        assert_eq!(cpu.sp, 0x00ffu16);
+        assert_eq!(cycle, 0x04u8);
+    }
+
+    # [test]
+    fn execute_plp_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.p  = 0x00u8;
+        cpu.pc = 0x0000u16;
+        cpu.sp = 0x00feu16;
+        mem.write_u8(0x0000, 0x28u8);
+        mem.write_u8(0x00ff, 0x90u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.p, 0x90u8);
         assert_eq!(cpu.sp, 0x00ffu16);
         assert_eq!(cycle, 0x04u8);
     }
