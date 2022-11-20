@@ -66,7 +66,7 @@ impl Cpu {
             }
             Opcode::BCC => {
                 let operand = self.fetch(system, mode);
-                if self.read_carry_flag() {
+                if !self.read_carry_flag() {
                     self.pc = operand.address;
                     2 + operand.cycle
                 } else {
@@ -425,8 +425,8 @@ mod tests {
         let mut mem = memory::Memory::default();
 
         for param in [
-            (true, 0x0012u16, 0x03u8),
-            (false, 0x0002u16, 0x02u8),
+            (false, 0x0012u16, 0x03u8),
+            (true, 0x0002u16, 0x02u8),
         ] {
             cpu.pc = 0x0000u16;
             cpu.write_carry_flag(param.0);
