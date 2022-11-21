@@ -56,6 +56,10 @@ pub enum Opcode {
     TXA,
     TXS,
     TYA,
+
+    // Illegal Opcodes
+    // https://wiki.nesdev.com/w/index.php/Programming_with_unofficial_opcodes
+    ALR
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -134,6 +138,7 @@ impl Instruction {
             0x48 => Instruction::pha(AddressingMode::Implied),
             0x49 => Instruction::eor(AddressingMode::Immediate),
             0x4a => Instruction::lsr(AddressingMode::Accumulator),
+            0x4b => Instruction::alr(AddressingMode::Immediate, Support::Illegal),
             0x4c => Instruction::jmp(AddressingMode::Absolute),
             0x4d => Instruction::eor(AddressingMode::Absolute),
             0x4e => Instruction::lsr(AddressingMode::Absolute),
@@ -477,7 +482,6 @@ impl Instruction {
         Instruction { opcode: Opcode::SED, addressing_mode: mode, support: Support::Official }
     }
 
-
     #[inline(always)]
     fn sei(mode: AddressingMode) -> Instruction {
         Instruction { opcode: Opcode::SEI, addressing_mode: mode, support: Support::Official }
@@ -526,6 +530,14 @@ impl Instruction {
     #[inline(always)]
     fn tya(mode: AddressingMode) -> Instruction {
         Instruction { opcode: Opcode::TYA, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn alr(mode: AddressingMode, support: Support) -> Instruction {
+        // Indicate that the instruction is an informal instruction
+        // by setting the instruction table.
+        debug_assert!(support == Support::Illegal);
+        Instruction { opcode: Opcode::ALR, addressing_mode: mode, support }
     }
 }
 
@@ -1211,5 +1223,13 @@ mod tests {
         assert_eq!(instruction.opcode, Opcode::TYA);
         assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
         assert_eq!(instruction.support, Support::Official);
+    }
+
+    #[test]
+    fn whether_alr_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x4bu8);
+        assert_eq!(instruction.opcode, Opcode::ALR);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Immediate);
+        assert_eq!(instruction.support, Support::Illegal);
     }
 }
