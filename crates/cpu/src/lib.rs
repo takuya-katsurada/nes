@@ -112,6 +112,15 @@ impl Cpu {
                     1 + operand.cycle
                 }
             }
+            Opcode::BPL => {
+                let operand = self.fetch(system, mode);
+                if !self.read_negative_flag() {
+                    self.pc = operand.address;
+                    2 + operand.cycle
+                } else {
+                    1 + operand.cycle
+                }
+            }
             Opcode::CLC => {
                 self.write_carry_flag(false);
                 2
@@ -558,6 +567,28 @@ mod tests {
             cpu.pc = 0x0000u16;
             cpu.write_zero_flag(param.0);
             mem.write_u8(0x0000, 0xd0u8);
+            mem.write_u8(0x0001, 0x10u8);
+            mem.write_u8(0x0012, 0xffu8);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.pc, param.1);
+            assert_eq!(cycle, param.2);
+        }
+    }
+
+    # [test]
+    fn execute_bpl_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (false, 0x0012u16, 0x03u8),
+            (true, 0x0002u16, 0x02u8),
+        ] {
+            cpu.pc = 0x0000u16;
+            cpu.write_negative_flag(param.0);
+            mem.write_u8(0x0000, 0x10u8);
             mem.write_u8(0x0001, 0x10u8);
             mem.write_u8(0x0012, 0xffu8);
 
