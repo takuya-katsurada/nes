@@ -75,180 +75,471 @@ pub enum AddressingMode {
     Relative,
 }
 
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+pub enum Support {
+    Official,
+    Illegal,
+}
+
 #[derive(Copy, Clone, Debug)]
-pub struct Instruction(pub Opcode, pub AddressingMode);
+pub struct Instruction {
+    pub opcode: Opcode,
+    pub addressing_mode: AddressingMode,
+    pub support: Support,
+}
 
 impl Instruction {
     pub fn from(opcode: u8) -> Instruction {
         match opcode {
-            0x00 => Instruction(Opcode::BRK, AddressingMode::Implied),
-            0x01 => Instruction(Opcode::ORA, AddressingMode::IndirectX),
-            0x05 => Instruction(Opcode::ORA, AddressingMode::ZeroPage),
-            0x06 => Instruction(Opcode::ASL, AddressingMode::ZeroPage),
-            0x08 => Instruction(Opcode::PHP, AddressingMode::Implied),
-            0x09 => Instruction(Opcode::ORA, AddressingMode::Immediate),
-            0x0d => Instruction(Opcode::ORA, AddressingMode::Absolute),
-            0x11 => Instruction(Opcode::ORA, AddressingMode::IndirectY),
-            0x15 => Instruction(Opcode::ORA, AddressingMode::ZeroPageX),
-            0x19 => Instruction(Opcode::ORA, AddressingMode::AbsoluteY),
-            0x0a => Instruction(Opcode::ASL, AddressingMode::Accumulator),
-            0x0e => Instruction(Opcode::ASL, AddressingMode::Absolute),
-            0x10 => Instruction(Opcode::BPL, AddressingMode::Relative),
-            0x16 => Instruction(Opcode::ASL, AddressingMode::ZeroPageX),
-            0x18 => Instruction(Opcode::CLC, AddressingMode::Implied),
-            0x1d => Instruction(Opcode::ORA, AddressingMode::AbsoluteX),
-            0x1e => Instruction(Opcode::ASL, AddressingMode::AbsoluteX),
-            0x20 => Instruction(Opcode::JSR, AddressingMode::Absolute),
-            0x21 => Instruction(Opcode::AND, AddressingMode::IndirectX),
-            0x24 => Instruction(Opcode::BIT, AddressingMode::ZeroPage),
-            0x25 => Instruction(Opcode::AND, AddressingMode::ZeroPage),
-            0x26 => Instruction(Opcode::ROL, AddressingMode::ZeroPage),
-            0x28 => Instruction(Opcode::PLP, AddressingMode::Implied),
-            0x29 => Instruction(Opcode::AND, AddressingMode::Immediate),
-            0x2a => Instruction(Opcode::ROL, AddressingMode::Accumulator),
-            0x2c => Instruction(Opcode::BIT, AddressingMode::Absolute),
-            0x2d => Instruction(Opcode::AND, AddressingMode::Absolute),
-            0x2e => Instruction(Opcode::ROL, AddressingMode::Absolute),
-            0x30 => Instruction(Opcode::BMI, AddressingMode::Relative),
-            0x31 => Instruction(Opcode::AND, AddressingMode::IndirectY),
-            0x35 => Instruction(Opcode::AND, AddressingMode::ZeroPageX),
-            0x36 => Instruction(Opcode::ROL, AddressingMode::ZeroPageX),
-            0x38 => Instruction(Opcode::SEC, AddressingMode::Implied),
-            0x39 => Instruction(Opcode::AND, AddressingMode::AbsoluteY),
-            0x3d => Instruction(Opcode::AND, AddressingMode::AbsoluteX),
-            0x3e => Instruction(Opcode::ROL, AddressingMode::AbsoluteX),
-            0x40 => Instruction(Opcode::RTI, AddressingMode::Implied),
-            0x41 => Instruction(Opcode::EOR, AddressingMode::IndirectX),
-            0x45 => Instruction(Opcode::EOR, AddressingMode::ZeroPage),
-            0x46 => Instruction(Opcode::LSR, AddressingMode::ZeroPage),
-            0x48 => Instruction(Opcode::PHA, AddressingMode::Implied),
-            0x49 => Instruction(Opcode::EOR, AddressingMode::Immediate),
-            0x4a => Instruction(Opcode::LSR, AddressingMode::Accumulator),
-            0x4c => Instruction(Opcode::JMP, AddressingMode::Absolute),
-            0x4d => Instruction(Opcode::EOR, AddressingMode::Absolute),
-            0x4e => Instruction(Opcode::LSR, AddressingMode::Absolute),
-            0x50 => Instruction(Opcode::BVC, AddressingMode::Relative),
-            0x51 => Instruction(Opcode::EOR, AddressingMode::IndirectY),
-            0x55 => Instruction(Opcode::EOR, AddressingMode::ZeroPageX),
-            0x56 => Instruction(Opcode::LSR, AddressingMode::ZeroPageX),
-            0x58 => Instruction(Opcode::CLI, AddressingMode::Implied),
-            0x59 => Instruction(Opcode::EOR, AddressingMode::AbsoluteY),
-            0x5d => Instruction(Opcode::EOR, AddressingMode::AbsoluteX),
-            0x5e => Instruction(Opcode::LSR, AddressingMode::AbsoluteX),
-            0x60 => Instruction(Opcode::RTS, AddressingMode::Implied),
-            0x61 => Instruction(Opcode::ADC, AddressingMode::IndirectX),
-            0x65 => Instruction(Opcode::ADC, AddressingMode::ZeroPage),
-            0x66 => Instruction(Opcode::ROR, AddressingMode::ZeroPage),
-            0x68 => Instruction(Opcode::PLA, AddressingMode::Implied),
-            0x69 => Instruction(Opcode::ADC, AddressingMode::Immediate),
-            0x6a => Instruction(Opcode::ROR, AddressingMode::Accumulator),
-            0x6c => Instruction(Opcode::JMP, AddressingMode::Indirect),
-            0x6d => Instruction(Opcode::ADC, AddressingMode::Absolute),
-            0x6e => Instruction(Opcode::ROR, AddressingMode::Absolute),
-            0x70 => Instruction(Opcode::BVS, AddressingMode::Relative),
-            0x71 => Instruction(Opcode::ADC, AddressingMode::IndirectY),
-            0x75 => Instruction(Opcode::ADC, AddressingMode::ZeroPageX),
-            0x76 => Instruction(Opcode::ROR, AddressingMode::ZeroPageX),
-            0x78 => Instruction(Opcode::SEI, AddressingMode::Implied),
-            0x79 => Instruction(Opcode::ADC, AddressingMode::AbsoluteY),
-            0x7d => Instruction(Opcode::ADC, AddressingMode::AbsoluteX),
-            0x7e => Instruction(Opcode::ROR, AddressingMode::AbsoluteX),
-            0x81 => Instruction(Opcode::STA, AddressingMode::IndirectX),
-            0x84 => Instruction(Opcode::STY, AddressingMode::ZeroPage),
-            0x85 => Instruction(Opcode::STA, AddressingMode::ZeroPage),
-            0x86 => Instruction(Opcode::STX, AddressingMode::ZeroPage),
-            0x88 => Instruction(Opcode::DEY, AddressingMode::Implied),
-            0x8a => Instruction(Opcode::TXA, AddressingMode::Implied),
-            0x8c => Instruction(Opcode::STY, AddressingMode::Absolute),
-            0x8d => Instruction(Opcode::STA, AddressingMode::Absolute),
-            0x8e => Instruction(Opcode::STX, AddressingMode::Absolute),
-            0x90 => Instruction(Opcode::BCC, AddressingMode::Relative),
-            0x91 => Instruction(Opcode::STA, AddressingMode::IndirectY),
-            0x94 => Instruction(Opcode::STY, AddressingMode::ZeroPageX),
-            0x95 => Instruction(Opcode::STA, AddressingMode::ZeroPageX),
-            0x96 => Instruction(Opcode::STX, AddressingMode::ZeroPageY),
-            0x98 => Instruction(Opcode::TYA, AddressingMode::Implied),
-            0x99 => Instruction(Opcode::STA, AddressingMode::AbsoluteY),
-            0x9a => Instruction(Opcode::TXS, AddressingMode::Implied),
-            0x9d => Instruction(Opcode::STA, AddressingMode::AbsoluteX),
-            0xa0 => Instruction(Opcode::LDY, AddressingMode::Immediate),
-            0xa1 => Instruction(Opcode::LDA, AddressingMode::IndirectX),
-            0xa2 => Instruction(Opcode::LDX, AddressingMode::Immediate),
-            0xa4 => Instruction(Opcode::LDY, AddressingMode::ZeroPage),
-            0xa5 => Instruction(Opcode::LDA, AddressingMode::ZeroPage),
-            0xa6 => Instruction(Opcode::LDX, AddressingMode::ZeroPage),
-            0xa8 => Instruction(Opcode::TAY, AddressingMode::Implied),
-            0xa9 => Instruction(Opcode::LDA, AddressingMode::Immediate),
-            0xaa => Instruction(Opcode::TAX, AddressingMode::Implied),
-            0xac => Instruction(Opcode::LDY, AddressingMode::Absolute),
-            0xad => Instruction(Opcode::LDA, AddressingMode::Absolute),
-            0xae => Instruction(Opcode::LDX, AddressingMode::Absolute),
-            0xb0 => Instruction(Opcode::BCS, AddressingMode::Relative),
-            0xb1 => Instruction(Opcode::LDA, AddressingMode::IndirectY),
-            0xb4 => Instruction(Opcode::LDY, AddressingMode::ZeroPageX),
-            0xb5 => Instruction(Opcode::LDA, AddressingMode::ZeroPageX),
-            0xb6 => Instruction(Opcode::LDX, AddressingMode::ZeroPageY),
-            0xb8 => Instruction(Opcode::CLV, AddressingMode::Implied),
-            0xb9 => Instruction(Opcode::LDA, AddressingMode::AbsoluteY),
-            0xba => Instruction(Opcode::TSX, AddressingMode::Implied),
-            0xbc => Instruction(Opcode::LDY, AddressingMode::AbsoluteX),
-            0xbd => Instruction(Opcode::LDA, AddressingMode::AbsoluteX),
-            0xbe => Instruction(Opcode::LDX, AddressingMode::AbsoluteY),
-            0xc0 => Instruction(Opcode::CPY, AddressingMode::Immediate),
-            0xc1 => Instruction(Opcode::CMP, AddressingMode::IndirectX),
-            0xc4 => Instruction(Opcode::CPY, AddressingMode::ZeroPage),
-            0xc5 => Instruction(Opcode::CMP, AddressingMode::ZeroPage),
-            0xc6 => Instruction(Opcode::DEC, AddressingMode::ZeroPage),
-            0xc8 => Instruction(Opcode::INY, AddressingMode::Implied),
-            0xc9 => Instruction(Opcode::CMP, AddressingMode::Immediate),
-            0xca => Instruction(Opcode::DEX, AddressingMode::Implied),
-            0xcc => Instruction(Opcode::CPY, AddressingMode::Absolute),
-            0xcd => Instruction(Opcode::CMP, AddressingMode::Absolute),
-            0xce => Instruction(Opcode::DEC, AddressingMode::Absolute),
-            0xd0 => Instruction(Opcode::BNE, AddressingMode::Relative),
-            0xd1 => Instruction(Opcode::CMP, AddressingMode::IndirectY),
-            0xd5 => Instruction(Opcode::CMP, AddressingMode::ZeroPageX),
-            0xd6 => Instruction(Opcode::DEC, AddressingMode::ZeroPageX),
-            0xd8 => Instruction(Opcode::CLD, AddressingMode::Implied),
-            0xd9 => Instruction(Opcode::CMP, AddressingMode::AbsoluteY),
-            0xdd => Instruction(Opcode::CMP, AddressingMode::AbsoluteX),
-            0xde => Instruction(Opcode::DEC, AddressingMode::AbsoluteX),
-            0xe0 => Instruction(Opcode::CPX, AddressingMode::Immediate),
-            0xe1 => Instruction(Opcode::SBC, AddressingMode::IndirectX),
-            0xe4 => Instruction(Opcode::CPX, AddressingMode::ZeroPage),
-            0xe5 => Instruction(Opcode::SBC, AddressingMode::ZeroPage),
-            0xe6 => Instruction(Opcode::INC, AddressingMode::ZeroPage),
-            0xe8 => Instruction(Opcode::INX, AddressingMode::Implied),
-            0xe9 => Instruction(Opcode::SBC, AddressingMode::Immediate),
-            0xea => Instruction(Opcode::NOP, AddressingMode::Implied),
-            0xec => Instruction(Opcode::CPX, AddressingMode::Absolute),
-            0xed => Instruction(Opcode::SBC, AddressingMode::Absolute),
-            0xee => Instruction(Opcode::INC, AddressingMode::Absolute),
-            0xf0 => Instruction(Opcode::BEQ, AddressingMode::Relative),
-            0xf1 => Instruction(Opcode::SBC, AddressingMode::IndirectY),
-            0xf5 => Instruction(Opcode::SBC, AddressingMode::ZeroPageX),
-            0xf6 => Instruction(Opcode::INC, AddressingMode::ZeroPageX),
-            0xf8 => Instruction(Opcode::SED, AddressingMode::Implied),
-            0xf9 => Instruction(Opcode::SBC, AddressingMode::AbsoluteY),
-            0xfd => Instruction(Opcode::SBC, AddressingMode::AbsoluteX),
-            0xfe => Instruction(Opcode::INC, AddressingMode::AbsoluteX),
+            0x00 => Instruction::brk(AddressingMode::Implied),
+            0x01 => Instruction::ora(AddressingMode::IndirectX),
+            0x05 => Instruction::ora(AddressingMode::ZeroPage),
+            0x06 => Instruction::asl(AddressingMode::ZeroPage),
+            0x08 => Instruction::php(AddressingMode::Implied),
+            0x09 => Instruction::ora(AddressingMode::Immediate),
+            0x0a => Instruction::asl(AddressingMode::Accumulator),
+            0x0d => Instruction::ora(AddressingMode::Absolute),
+            0x0e => Instruction::asl(AddressingMode::Absolute),
+            0x10 => Instruction::bpl(AddressingMode::Relative),
+            0x11 => Instruction::ora(AddressingMode::IndirectY),
+            0x15 => Instruction::ora(AddressingMode::ZeroPageX),
+            0x16 => Instruction::asl(AddressingMode::ZeroPageX),
+            0x18 => Instruction::clc(AddressingMode::Implied),
+            0x19 => Instruction::ora(AddressingMode::AbsoluteY),
+            0x1d => Instruction::ora(AddressingMode::AbsoluteX),
+            0x1e => Instruction::asl(AddressingMode::AbsoluteX),
+            0x20 => Instruction::jsr(AddressingMode::Absolute),
+            0x21 => Instruction::and(AddressingMode::IndirectX),
+            0x24 => Instruction::bit(AddressingMode::ZeroPage),
+            0x25 => Instruction::and(AddressingMode::ZeroPage),
+            0x26 => Instruction::rol(AddressingMode::ZeroPage),
+            0x28 => Instruction::plp(AddressingMode::Implied),
+            0x29 => Instruction::and(AddressingMode::Immediate),
+            0x2a => Instruction::rol(AddressingMode::Accumulator),
+            0x2c => Instruction::bit(AddressingMode::Absolute),
+            0x2d => Instruction::and(AddressingMode::Absolute),
+            0x2e => Instruction::rol(AddressingMode::Absolute),
+            0x30 => Instruction::bmi(AddressingMode::Relative),
+            0x31 => Instruction::and(AddressingMode::IndirectY),
+            0x35 => Instruction::and(AddressingMode::ZeroPageX),
+            0x36 => Instruction::rol(AddressingMode::ZeroPageX),
+            0x38 => Instruction::sec(AddressingMode::Implied),
+            0x39 => Instruction::and(AddressingMode::AbsoluteY),
+            0x3d => Instruction::and(AddressingMode::AbsoluteX),
+            0x3e => Instruction::rol(AddressingMode::AbsoluteX),
+            0x40 => Instruction::rti(AddressingMode::Implied),
+            0x41 => Instruction::eor(AddressingMode::IndirectX),
+            0x45 => Instruction::eor(AddressingMode::ZeroPage),
+            0x46 => Instruction::lsr(AddressingMode::ZeroPage),
+            0x48 => Instruction::pha(AddressingMode::Implied),
+            0x49 => Instruction::eor(AddressingMode::Immediate),
+            0x4a => Instruction::lsr(AddressingMode::Accumulator),
+            0x4c => Instruction::jmp(AddressingMode::Absolute),
+            0x4d => Instruction::eor(AddressingMode::Absolute),
+            0x4e => Instruction::lsr(AddressingMode::Absolute),
+            0x50 => Instruction::bvc(AddressingMode::Relative),
+            0x51 => Instruction::eor(AddressingMode::IndirectY),
+            0x55 => Instruction::eor(AddressingMode::ZeroPageX),
+            0x56 => Instruction::lsr(AddressingMode::ZeroPageX),
+            0x58 => Instruction::cli(AddressingMode::Implied),
+            0x59 => Instruction::eor(AddressingMode::AbsoluteY),
+            0x5d => Instruction::eor(AddressingMode::AbsoluteX),
+            0x5e => Instruction::lsr(AddressingMode::AbsoluteX),
+            0x60 => Instruction::rts(AddressingMode::Implied),
+            0x61 => Instruction::adc(AddressingMode::IndirectX),
+            0x65 => Instruction::adc(AddressingMode::ZeroPage),
+            0x66 => Instruction::ror(AddressingMode::ZeroPage),
+            0x68 => Instruction::pla(AddressingMode::Implied),
+            0x69 => Instruction::adc(AddressingMode::Immediate),
+            0x6a => Instruction::ror(AddressingMode::Accumulator),
+            0x6c => Instruction::jmp(AddressingMode::Indirect),
+            0x6d => Instruction::adc(AddressingMode::Absolute),
+            0x6e => Instruction::ror(AddressingMode::Absolute),
+            0x70 => Instruction::bvs(AddressingMode::Relative),
+            0x71 => Instruction::adc(AddressingMode::IndirectY),
+            0x75 => Instruction::adc(AddressingMode::ZeroPageX),
+            0x76 => Instruction::ror(AddressingMode::ZeroPageX),
+            0x78 => Instruction::sei(AddressingMode::Implied),
+            0x79 => Instruction::adc(AddressingMode::AbsoluteY),
+            0x7d => Instruction::adc(AddressingMode::AbsoluteX),
+            0x7e => Instruction::ror(AddressingMode::AbsoluteX),
+            0x81 => Instruction::sta(AddressingMode::IndirectX),
+            0x84 => Instruction::sty(AddressingMode::ZeroPage),
+            0x85 => Instruction::sta(AddressingMode::ZeroPage),
+            0x86 => Instruction::stx(AddressingMode::ZeroPage),
+            0x88 => Instruction::dey(AddressingMode::Implied),
+            0x8a => Instruction::txa(AddressingMode::Implied),
+            0x8c => Instruction::sty(AddressingMode::Absolute),
+            0x8d => Instruction::sta(AddressingMode::Absolute),
+            0x8e => Instruction::stx(AddressingMode::Absolute),
+            0x90 => Instruction::bcc(AddressingMode::Relative),
+            0x91 => Instruction::sta(AddressingMode::IndirectY),
+            0x94 => Instruction::sty(AddressingMode::ZeroPageX),
+            0x95 => Instruction::sta(AddressingMode::ZeroPageX),
+            0x96 => Instruction::stx(AddressingMode::ZeroPageY),
+            0x98 => Instruction::tya(AddressingMode::Implied),
+            0x99 => Instruction::sta(AddressingMode::AbsoluteY),
+            0x9a => Instruction::txs(AddressingMode::Implied),
+            0x9d => Instruction::sta(AddressingMode::AbsoluteX),
+            0xa0 => Instruction::ldy(AddressingMode::Immediate),
+            0xa1 => Instruction::lda(AddressingMode::IndirectX),
+            0xa2 => Instruction::ldx(AddressingMode::Immediate),
+            0xa4 => Instruction::ldy(AddressingMode::ZeroPage),
+            0xa5 => Instruction::lda(AddressingMode::ZeroPage),
+            0xa6 => Instruction::ldx(AddressingMode::ZeroPage),
+            0xa8 => Instruction::tay(AddressingMode::Implied),
+            0xa9 => Instruction::lda(AddressingMode::Immediate),
+            0xaa => Instruction::tax(AddressingMode::Implied),
+            0xac => Instruction::ldy(AddressingMode::Absolute),
+            0xad => Instruction::lda(AddressingMode::Absolute),
+            0xae => Instruction::ldx(AddressingMode::Absolute),
+            0xb0 => Instruction::bcs(AddressingMode::Relative),
+            0xb1 => Instruction::lda(AddressingMode::IndirectY),
+            0xb4 => Instruction::ldy(AddressingMode::ZeroPageX),
+            0xb5 => Instruction::lda(AddressingMode::ZeroPageX),
+            0xb6 => Instruction::ldx(AddressingMode::ZeroPageY),
+            0xb8 => Instruction::clv(AddressingMode::Implied),
+            0xb9 => Instruction::lda(AddressingMode::AbsoluteY),
+            0xba => Instruction::tsx(AddressingMode::Implied),
+            0xbc => Instruction::ldy(AddressingMode::AbsoluteX),
+            0xbd => Instruction::lda(AddressingMode::AbsoluteX),
+            0xbe => Instruction::ldx(AddressingMode::AbsoluteY),
+            0xc0 => Instruction::cpy(AddressingMode::Immediate),
+            0xc1 => Instruction::cmp(AddressingMode::IndirectX),
+            0xc4 => Instruction::cpy(AddressingMode::ZeroPage),
+            0xc5 => Instruction::cmp(AddressingMode::ZeroPage),
+            0xc6 => Instruction::dec(AddressingMode::ZeroPage),
+            0xc8 => Instruction::iny(AddressingMode::Implied),
+            0xc9 => Instruction::cmp(AddressingMode::Immediate),
+            0xca => Instruction::dex(AddressingMode::Implied),
+            0xcc => Instruction::cpy(AddressingMode::Absolute),
+            0xcd => Instruction::cmp(AddressingMode::Absolute),
+            0xce => Instruction::dec(AddressingMode::Absolute),
+            0xd0 => Instruction::bne(AddressingMode::Relative),
+            0xd1 => Instruction::cmp(AddressingMode::IndirectY),
+            0xd5 => Instruction::cmp(AddressingMode::ZeroPageX),
+            0xd6 => Instruction::dec(AddressingMode::ZeroPageX),
+            0xd8 => Instruction::cld(AddressingMode::Implied),
+            0xd9 => Instruction::cmp(AddressingMode::AbsoluteY),
+            0xdd => Instruction::cmp(AddressingMode::AbsoluteX),
+            0xde => Instruction::dec(AddressingMode::AbsoluteX),
+            0xe0 => Instruction::cpx(AddressingMode::Immediate),
+            0xe1 => Instruction::sbc(AddressingMode::IndirectX),
+            0xe4 => Instruction::cpx(AddressingMode::ZeroPage),
+            0xe5 => Instruction::sbc(AddressingMode::ZeroPage),
+            0xe6 => Instruction::inc(AddressingMode::ZeroPage),
+            0xe8 => Instruction::inx(AddressingMode::Implied),
+            0xe9 => Instruction::sbc(AddressingMode::Immediate),
+            0xea => Instruction::nop(AddressingMode::Implied),
+            0xec => Instruction::cpx(AddressingMode::Absolute),
+            0xed => Instruction::sbc(AddressingMode::Absolute),
+            0xee => Instruction::inc(AddressingMode::Absolute),
+            0xf0 => Instruction::beq(AddressingMode::Relative),
+            0xf1 => Instruction::sbc(AddressingMode::IndirectY),
+            0xf5 => Instruction::sbc(AddressingMode::ZeroPageX),
+            0xf6 => Instruction::inc(AddressingMode::ZeroPageX),
+            0xf8 => Instruction::sed(AddressingMode::Implied),
+            0xf9 => Instruction::sbc(AddressingMode::AbsoluteY),
+            0xfd => Instruction::sbc(AddressingMode::AbsoluteX),
+            0xfe => Instruction::inc(AddressingMode::AbsoluteX),
 
             _ => panic!("unsupported CPU instruction:{:08x}", opcode),
         }
+    }
+
+    #[inline(always)]
+    fn adc(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::ADC, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn and(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::AND, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn asl(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::ASL, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn bit(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BIT, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn beq(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BEQ, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn bmi(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BMI, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn bne(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BNE, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn bpl(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BPL, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn brk(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BRK, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn bcc(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BCC, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn bcs(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BCS, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn bvc(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BVC, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn bvs(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::BVS, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn clc(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::CLC, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn cld(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::CLD, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn cli(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::CLI, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn clv(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::CLV, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn cmp(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::CMP, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn cpx(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::CPX, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn cpy(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::CPY, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn dec(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::DEC, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn dex(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::DEX, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn dey(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::DEY, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn eor(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::EOR, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn inc(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::INC, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn inx(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::INX, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn iny(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::INY, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn jmp(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::JMP, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn jsr(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::JSR, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn lda(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::LDA, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn ldx(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::LDX, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn ldy(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::LDY, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn lsr(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::LSR, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn nop(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::NOP, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn ora(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::ORA, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn pha(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::PHA, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn php(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::PHP, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn pla(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::PLA, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn plp(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::PLP, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn rts(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::RTS, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn rol(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::ROL, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn ror(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::ROR, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn rti(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::RTI, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn sbc(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::SBC, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn sec(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::SEC, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn sed(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::SED, addressing_mode: mode, support: Support::Official }
+    }
+
+
+    #[inline(always)]
+    fn sei(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::SEI, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn sta(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::STA, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn stx(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::STX, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn sty(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::STY, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn txa(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::TXA, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn tax(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::TAX, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn tay(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::TAY, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn tsx(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::TSX, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn txs(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::TXS, addressing_mode: mode, support: Support::Official }
+    }
+
+    #[inline(always)]
+    fn tya(mode: AddressingMode) -> Instruction {
+        Instruction { opcode: Opcode::TYA, addressing_mode: mode, support: Support::Official }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::instruction::{Instruction, Opcode, AddressingMode};
+    use crate::instruction::{Instruction, Opcode, AddressingMode, Support};
 
     #[test]
     fn whether_adc_instruction_was_created_from_opcode() {
         let opcodes = [0x61u8,0x65u8,0x69u8,0x6du8,0x71u8,0x75u8,0x79u8,0x7du8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::ADC);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::ADC);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x69 => AddressingMode::Immediate,
                 0x65 => AddressingMode::ZeroPage,
                 0x75 => AddressingMode::ZeroPageX,
@@ -259,6 +550,7 @@ mod tests {
                 0x71 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -267,8 +559,8 @@ mod tests {
         let opcodes = [0x21u8,0x25u8,0x29u8,0x2du8,0x31u8,0x35u8,0x39u8,0x3du8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::AND);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::AND);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x29 => AddressingMode::Immediate,
                 0x25 => AddressingMode::ZeroPage,
                 0x35 => AddressingMode::ZeroPageX,
@@ -279,6 +571,7 @@ mod tests {
                 0x31 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -287,8 +580,8 @@ mod tests {
         let opcodes = [0x06u8,0x0au8,0x0eu8,0x16u8,0x1eu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::ASL);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::ASL);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x0a => AddressingMode::Accumulator,
                 0x06 => AddressingMode::ZeroPage,
                 0x16 => AddressingMode::ZeroPageX,
@@ -296,28 +589,32 @@ mod tests {
                 0x1e => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_bcc_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x90u8);
-        assert_eq!(instruction.0, Opcode::BCC);
-        assert_eq!(instruction.1, AddressingMode::Relative);
+        assert_eq!(instruction.opcode, Opcode::BCC);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Relative);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_bcs_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xb0u8);
-        assert_eq!(instruction.0, Opcode::BCS);
-        assert_eq!(instruction.1, AddressingMode::Relative);
+        assert_eq!(instruction.opcode, Opcode::BCS);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Relative);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_beq_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xf0u8);
-        assert_eq!(instruction.0, Opcode::BEQ);
-        assert_eq!(instruction.1, AddressingMode::Relative);
+        assert_eq!(instruction.opcode, Opcode::BEQ);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Relative);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
@@ -325,83 +622,94 @@ mod tests {
         let opcodes = [0x24u8,0x2cu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::BIT);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::BIT);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x24 => AddressingMode::ZeroPage,
                 0x2c => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_bmi_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x30u8);
-        assert_eq!(instruction.0, Opcode::BMI);
-        assert_eq!(instruction.1, AddressingMode::Relative);
+        assert_eq!(instruction.opcode, Opcode::BMI);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Relative);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_bne_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xd0u8);
-        assert_eq!(instruction.0, Opcode::BNE);
-        assert_eq!(instruction.1, AddressingMode::Relative);
+        assert_eq!(instruction.opcode, Opcode::BNE);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Relative);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_bpl_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x10u8);
-        assert_eq!(instruction.0, Opcode::BPL);
-        assert_eq!(instruction.1, AddressingMode::Relative);
+        assert_eq!(instruction.opcode, Opcode::BPL);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Relative);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_brk_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x00u8);
-        assert_eq!(instruction.0, Opcode::BRK);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::BRK);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_bvc_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x50u8);
-        assert_eq!(instruction.0, Opcode::BVC);
-        assert_eq!(instruction.1, AddressingMode::Relative);
+        assert_eq!(instruction.opcode, Opcode::BVC);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Relative);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_bvs_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x70u8);
-        assert_eq!(instruction.0, Opcode::BVS);
-        assert_eq!(instruction.1, AddressingMode::Relative);
+        assert_eq!(instruction.opcode, Opcode::BVS);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Relative);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_clc_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x18u8);
-        assert_eq!(instruction.0, Opcode::CLC);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::CLC);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_cld_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xd8u8);
-        assert_eq!(instruction.0, Opcode::CLD);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::CLD);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_cli_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x58u8);
-        assert_eq!(instruction.0, Opcode::CLI);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::CLI);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_clv_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xb8u8);
-        assert_eq!(instruction.0, Opcode::CLV);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::CLV);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
@@ -409,8 +717,8 @@ mod tests {
         let opcodes = [0xc1u8,0xc5u8,0xc9u8,0xcdu8,0xd1u8,0xd5u8,0xd9u8,0xddu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::CMP);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::CMP);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xc9 => AddressingMode::Immediate,
                 0xc5 => AddressingMode::ZeroPage,
                 0xd5 => AddressingMode::ZeroPageX,
@@ -421,6 +729,7 @@ mod tests {
                 0xd1 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -429,13 +738,14 @@ mod tests {
         let opcodes = [0xe0u8,0xe4u8,0xecu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::CPX);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::CPX);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xe0 => AddressingMode::Immediate,
                 0xe4 => AddressingMode::ZeroPage,
                 0xec => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -444,13 +754,14 @@ mod tests {
         let opcodes = [0xc0u8,0xc4u8,0xccu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::CPY);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::CPY);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xc0 => AddressingMode::Immediate,
                 0xc4 => AddressingMode::ZeroPage,
                 0xcc => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -459,29 +770,32 @@ mod tests {
         let opcodes = [0xc6u8,0xceu8,0xd6u8,0xdeu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::DEC);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::DEC);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xc6 => AddressingMode::ZeroPage,
                 0xd6 => AddressingMode::ZeroPageX,
                 0xce => AddressingMode::Absolute,
                 0xde => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_dex_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xcau8);
-        assert_eq!(instruction.0, Opcode::DEX);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::DEX);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_dey_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x88u8);
-        assert_eq!(instruction.0, Opcode::DEY);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::DEY);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
@@ -489,8 +803,8 @@ mod tests {
         let opcodes = [0x41u8,0x45u8,0x49u8,0x4du8,0x51u8,0x55u8,0x59u8,0x5du8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::EOR);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::EOR);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x49 => AddressingMode::Immediate,
                 0x45 => AddressingMode::ZeroPage,
                 0x55 => AddressingMode::ZeroPageX,
@@ -501,6 +815,7 @@ mod tests {
                 0x51 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -509,29 +824,32 @@ mod tests {
         let opcodes = [0xe6u8,0xeeu8,0xf6u8,0xfeu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::INC);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::INC);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xe6 => AddressingMode::ZeroPage,
                 0xf6 => AddressingMode::ZeroPageX,
                 0xee => AddressingMode::Absolute,
                 0xfe => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_inx_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xe8u8);
-        assert_eq!(instruction.0, Opcode::INX);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::INX);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_iny_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xc8u8);
-        assert_eq!(instruction.0, Opcode::INY);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::INY);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
@@ -539,20 +857,22 @@ mod tests {
         let opcodes = [0x4cu8,0x6cu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::JMP);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::JMP);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x4c => AddressingMode::Absolute,
                 0x6c => AddressingMode::Indirect,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_jsr_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x20u8);
-        assert_eq!(instruction.0, Opcode::JSR);
-        assert_eq!(instruction.1, AddressingMode::Absolute);
+        assert_eq!(instruction.opcode, Opcode::JSR);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Absolute);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
@@ -560,8 +880,8 @@ mod tests {
         let opcodes = [0xa1u8,0xa5u8,0xa9u8,0xadu8,0xb1u8,0xb5u8,0xb9u8,0xbdu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::LDA);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::LDA);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xa9 => AddressingMode::Immediate,
                 0xa5 => AddressingMode::ZeroPage,
                 0xb5 => AddressingMode::ZeroPageX,
@@ -572,6 +892,7 @@ mod tests {
                 0xb1 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -580,8 +901,8 @@ mod tests {
         let opcodes = [0xa2u8,0xa6u8,0xaeu8,0xb6u8,0xbeu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::LDX);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::LDX);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xa2 => AddressingMode::Immediate,
                 0xa6 => AddressingMode::ZeroPage,
                 0xb6 => AddressingMode::ZeroPageY,
@@ -589,6 +910,7 @@ mod tests {
                 0xbe => AddressingMode::AbsoluteY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -597,8 +919,8 @@ mod tests {
         let opcodes = [0xa0u8,0xa4u8,0xacu8,0xb4u8,0xbcu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::LDY);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::LDY);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xa0 => AddressingMode::Immediate,
                 0xa4 => AddressingMode::ZeroPage,
                 0xb4 => AddressingMode::ZeroPageX,
@@ -606,6 +928,7 @@ mod tests {
                 0xbc => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -614,8 +937,8 @@ mod tests {
         let opcodes = [0x46u8,0x4au8,0x4eu8,0x56u8,0x5eu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::LSR);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::LSR);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x4a => AddressingMode::Accumulator,
                 0x46 => AddressingMode::ZeroPage,
                 0x56 => AddressingMode::ZeroPageX,
@@ -623,6 +946,7 @@ mod tests {
                 0x5e => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -633,8 +957,9 @@ mod tests {
         let opcodes = [0xeau8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::NOP);
-            assert_eq!(instruction.1, AddressingMode::Implied);
+            assert_eq!(instruction.opcode, Opcode::NOP);
+            assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -643,8 +968,8 @@ mod tests {
         let opcodes = [0x01u8,0x05u8,0x09u8,0x0du8,0x11u8,0x15u8,0x19u8,0x1du8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::ORA);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::ORA);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x09 => AddressingMode::Immediate,
                 0x05 => AddressingMode::ZeroPage,
                 0x15 => AddressingMode::ZeroPageX,
@@ -655,35 +980,40 @@ mod tests {
                 0x11 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_pha_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x48u8);
-        assert_eq!(instruction.0, Opcode::PHA);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::PHA);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_php_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x08u8);
-        assert_eq!(instruction.0, Opcode::PHP);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::PHP);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_pla_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x68u8);
-        assert_eq!(instruction.0, Opcode::PLA);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::PLA);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_plp_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x28u8);
-        assert_eq!(instruction.0, Opcode::PLP);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::PLP);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
@@ -691,8 +1021,8 @@ mod tests {
         let opcodes = [0x26u8,0x2au8,0x2eu8,0x36u8,0x3eu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::ROL);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::ROL);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x2a => AddressingMode::Accumulator,
                 0x26 => AddressingMode::ZeroPage,
                 0x36 => AddressingMode::ZeroPageX,
@@ -700,6 +1030,7 @@ mod tests {
                 0x3e => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -708,8 +1039,8 @@ mod tests {
         let opcodes = [0x66u8,0x6au8,0x6eu8,0x76u8,0x7eu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::ROR);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::ROR);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x6a => AddressingMode::Accumulator,
                 0x66 => AddressingMode::ZeroPage,
                 0x76 => AddressingMode::ZeroPageX,
@@ -717,21 +1048,24 @@ mod tests {
                 0x7e => AddressingMode::AbsoluteX,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_rti_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x40u8);
-        assert_eq!(instruction.0, Opcode::RTI);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::RTI);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_rts_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x60u8);
-        assert_eq!(instruction.0, Opcode::RTS);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::RTS);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
@@ -739,8 +1073,8 @@ mod tests {
         let opcodes = [0xe1u8,0xe5u8,0xe9u8,0xedu8,0xf1u8,0xf5u8,0xf9u8,0xfdu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::SBC);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::SBC);
+            assert_eq!(instruction.addressing_mode, match op {
                 0xe9 => AddressingMode::Immediate,
                 0xe5 => AddressingMode::ZeroPage,
                 0xf5 => AddressingMode::ZeroPageX,
@@ -751,28 +1085,32 @@ mod tests {
                 0xf1 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_sec_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x38u8);
-        assert_eq!(instruction.0, Opcode::SEC);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::SEC);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_sed_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xf8u8);
-        assert_eq!(instruction.0, Opcode::SED);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::SED);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_sei_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x78u8);
-        assert_eq!(instruction.0, Opcode::SEI);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::SEI);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
@@ -780,8 +1118,8 @@ mod tests {
         let opcodes = [0x81u8,0x85u8,0x8du8,0x91u8,0x95u8,0x99u8,0x9du8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::STA);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::STA);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x85 => AddressingMode::ZeroPage,
                 0x95 => AddressingMode::ZeroPageX,
                 0x8d => AddressingMode::Absolute,
@@ -791,6 +1129,7 @@ mod tests {
                 0x91 => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -799,13 +1138,14 @@ mod tests {
         let opcodes = [0x86u8,0x8eu8,0x96u8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::STX);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::STX);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x86 => AddressingMode::ZeroPage,
                 0x96 => AddressingMode::ZeroPageY,
                 0x8e => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
@@ -814,55 +1154,62 @@ mod tests {
         let opcodes = [0x84u8,0x8cu8,0x94u8];
         for op in opcodes {
             let instruction = Instruction::from(op);
-            assert_eq!(instruction.0, Opcode::STY);
-            assert_eq!(instruction.1, match op {
+            assert_eq!(instruction.opcode, Opcode::STY);
+            assert_eq!(instruction.addressing_mode, match op {
                 0x84 => AddressingMode::ZeroPage,
                 0x94 => AddressingMode::ZeroPageX,
                 0x8c => AddressingMode::Absolute,
                 _ => panic!("invalid opcode has been specified")
             });
+            assert_eq!(instruction.support, Support::Official);
         }
     }
 
     #[test]
     fn whether_tax_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xaau8);
-        assert_eq!(instruction.0, Opcode::TAX);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::TAX);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_tay_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xa8u8);
-        assert_eq!(instruction.0, Opcode::TAY);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::TAY);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_tsx_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0xbau8);
-        assert_eq!(instruction.0, Opcode::TSX);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::TSX);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_txa_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x8au8);
-        assert_eq!(instruction.0, Opcode::TXA);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::TXA);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_txs_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x9au8);
-        assert_eq!(instruction.0, Opcode::TXS);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::TXS);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 
     #[test]
     fn whether_tya_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x98u8);
-        assert_eq!(instruction.0, Opcode::TYA);
-        assert_eq!(instruction.1, AddressingMode::Implied);
+        assert_eq!(instruction.opcode, Opcode::TYA);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
+        assert_eq!(instruction.support, Support::Official);
     }
 }

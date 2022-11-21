@@ -39,7 +39,10 @@ impl Default for Cpu {
 impl Cpu {
     pub fn step(&mut self, system: &mut dyn memory::system::SystemBus) -> u8 {
         let raw_opcode = self.fetch_u8(system);
-        let Instruction(opcode, mode) = Instruction::from(raw_opcode);
+        let instruction = Instruction::from(raw_opcode);
+
+        let opcode = instruction.opcode;
+        let mode = instruction.addressing_mode;
 
         match opcode {
             Opcode::AND => {
