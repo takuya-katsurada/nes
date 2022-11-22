@@ -63,6 +63,7 @@ pub enum Opcode {
     ANC,
     ARR,
     AXS,
+    LAX,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -194,26 +195,32 @@ impl Instruction {
             0xa0 => Instruction::ldy(AddressingMode::Immediate),
             0xa1 => Instruction::lda(AddressingMode::IndirectX),
             0xa2 => Instruction::ldx(AddressingMode::Immediate),
+            0xa3 => Instruction::lax(AddressingMode::IndirectX, Support::Illegal),
             0xa4 => Instruction::ldy(AddressingMode::ZeroPage),
             0xa5 => Instruction::lda(AddressingMode::ZeroPage),
             0xa6 => Instruction::ldx(AddressingMode::ZeroPage),
+            0xa7 => Instruction::lax(AddressingMode::ZeroPage, Support::Illegal),
             0xa8 => Instruction::tay(AddressingMode::Implied),
             0xa9 => Instruction::lda(AddressingMode::Immediate),
             0xaa => Instruction::tax(AddressingMode::Implied),
             0xac => Instruction::ldy(AddressingMode::Absolute),
             0xad => Instruction::lda(AddressingMode::Absolute),
             0xae => Instruction::ldx(AddressingMode::Absolute),
+            0xaf => Instruction::lax(AddressingMode::Absolute, Support::Illegal),
             0xb0 => Instruction::bcs(AddressingMode::Relative),
             0xb1 => Instruction::lda(AddressingMode::IndirectY),
+            0xb3 => Instruction::lax(AddressingMode::IndirectY, Support::Illegal),
             0xb4 => Instruction::ldy(AddressingMode::ZeroPageX),
             0xb5 => Instruction::lda(AddressingMode::ZeroPageX),
             0xb6 => Instruction::ldx(AddressingMode::ZeroPageY),
+            0xb7 => Instruction::lax(AddressingMode::ZeroPageY, Support::Illegal),
             0xb8 => Instruction::clv(AddressingMode::Implied),
             0xb9 => Instruction::lda(AddressingMode::AbsoluteY),
             0xba => Instruction::tsx(AddressingMode::Implied),
             0xbc => Instruction::ldy(AddressingMode::AbsoluteX),
             0xbd => Instruction::lda(AddressingMode::AbsoluteX),
             0xbe => Instruction::ldx(AddressingMode::AbsoluteY),
+            0xbf => Instruction::lax(AddressingMode::AbsoluteY, Support::Illegal),
             0xc0 => Instruction::cpy(AddressingMode::Immediate),
             0xc1 => Instruction::cmp(AddressingMode::IndirectX),
             0xc4 => Instruction::cpy(AddressingMode::ZeroPage),
@@ -568,6 +575,14 @@ impl Instruction {
         // by setting the instruction table.
         debug_assert!(support == Support::Illegal);
         Instruction { opcode: Opcode::AXS, addressing_mode: mode, support }
+    }
+
+    #[inline(always)]
+    fn lax(mode: AddressingMode, support: Support) -> Instruction {
+        // Indicate that the instruction is an informal instruction
+        // by setting the instruction table.
+        debug_assert!(support == Support::Illegal);
+        Instruction { opcode: Opcode::LAX, addressing_mode: mode, support }
     }
 }
 
@@ -1285,5 +1300,24 @@ mod tests {
         assert_eq!(instruction.opcode, Opcode::AXS);
         assert_eq!(instruction.addressing_mode, AddressingMode::Immediate);
         assert_eq!(instruction.support, Support::Illegal);
+    }
+
+    #[test]
+    fn whether_lax_instruction_was_created_from_opcode() {
+        let opcodes = [0xa3u8,0xa7u8,0xafu8,0xb3u8,0xb7u8,0xbfu8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.opcode, Opcode::LAX);
+            assert_eq!(instruction.addressing_mode, match op {
+                0xa3 => AddressingMode::IndirectX,
+                0xa7 => AddressingMode::ZeroPage,
+                0xaf => AddressingMode::Absolute,
+                0xb3 => AddressingMode::IndirectY,
+                0xb7 => AddressingMode::ZeroPageY,
+                0xbf => AddressingMode::AbsoluteY,
+                _ => panic!("invalid opcode has been specified")
+            });
+            assert_eq!(instruction.support, Support::Illegal);
+        }
     }
 }
