@@ -59,7 +59,8 @@ pub enum Opcode {
 
     // Illegal Opcodes
     // https://wiki.nesdev.com/w/index.php/Programming_with_unofficial_opcodes
-    ALR
+    ALR,
+    ANC,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -102,6 +103,7 @@ impl Instruction {
             0x08 => Instruction::php(AddressingMode::Implied),
             0x09 => Instruction::ora(AddressingMode::Immediate),
             0x0a => Instruction::asl(AddressingMode::Accumulator),
+            0x0b => Instruction::anc(AddressingMode::Immediate, Support::Illegal),
             0x0d => Instruction::ora(AddressingMode::Absolute),
             0x0e => Instruction::asl(AddressingMode::Absolute),
             0x10 => Instruction::bpl(AddressingMode::Relative),
@@ -538,6 +540,14 @@ impl Instruction {
         // by setting the instruction table.
         debug_assert!(support == Support::Illegal);
         Instruction { opcode: Opcode::ALR, addressing_mode: mode, support }
+    }
+
+    #[inline(always)]
+    fn anc(mode: AddressingMode, support: Support) -> Instruction {
+        // Indicate that the instruction is an informal instruction
+        // by setting the instruction table.
+        debug_assert!(support == Support::Illegal);
+        Instruction { opcode: Opcode::ANC, addressing_mode: mode, support }
     }
 }
 
@@ -1229,6 +1239,14 @@ mod tests {
     fn whether_alr_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x4bu8);
         assert_eq!(instruction.opcode, Opcode::ALR);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Immediate);
+        assert_eq!(instruction.support, Support::Illegal);
+    }
+
+    #[test]
+    fn whether_anc_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0x0bu8);
+        assert_eq!(instruction.opcode, Opcode::ANC);
         assert_eq!(instruction.addressing_mode, AddressingMode::Immediate);
         assert_eq!(instruction.support, Support::Illegal);
     }
