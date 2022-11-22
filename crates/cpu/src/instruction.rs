@@ -64,6 +64,7 @@ pub enum Opcode {
     ARR,
     AXS,
     LAX,
+    SAX,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -175,19 +176,23 @@ impl Instruction {
             0x7d => Instruction::adc(AddressingMode::AbsoluteX),
             0x7e => Instruction::ror(AddressingMode::AbsoluteX),
             0x81 => Instruction::sta(AddressingMode::IndirectX),
+            0x83 => Instruction::sax(AddressingMode::IndirectX, Support::Illegal),
             0x84 => Instruction::sty(AddressingMode::ZeroPage),
             0x85 => Instruction::sta(AddressingMode::ZeroPage),
             0x86 => Instruction::stx(AddressingMode::ZeroPage),
+            0x87 => Instruction::sax(AddressingMode::ZeroPage, Support::Illegal),
             0x88 => Instruction::dey(AddressingMode::Implied),
             0x8a => Instruction::txa(AddressingMode::Implied),
             0x8c => Instruction::sty(AddressingMode::Absolute),
             0x8d => Instruction::sta(AddressingMode::Absolute),
             0x8e => Instruction::stx(AddressingMode::Absolute),
+            0x8f => Instruction::sax(AddressingMode::Absolute, Support::Illegal),
             0x90 => Instruction::bcc(AddressingMode::Relative),
             0x91 => Instruction::sta(AddressingMode::IndirectY),
             0x94 => Instruction::sty(AddressingMode::ZeroPageX),
             0x95 => Instruction::sta(AddressingMode::ZeroPageX),
             0x96 => Instruction::stx(AddressingMode::ZeroPageY),
+            0x97 => Instruction::sax(AddressingMode::ZeroPageY, Support::Illegal),
             0x98 => Instruction::tya(AddressingMode::Implied),
             0x99 => Instruction::sta(AddressingMode::AbsoluteY),
             0x9a => Instruction::txs(AddressingMode::Implied),
@@ -583,6 +588,14 @@ impl Instruction {
         // by setting the instruction table.
         debug_assert!(support == Support::Illegal);
         Instruction { opcode: Opcode::LAX, addressing_mode: mode, support }
+    }
+
+    #[inline(always)]
+    fn sax(mode: AddressingMode, support: Support) -> Instruction {
+        // Indicate that the instruction is an informal instruction
+        // by setting the instruction table.
+        debug_assert!(support == Support::Illegal);
+        Instruction { opcode: Opcode::SAX, addressing_mode: mode, support }
     }
 }
 
@@ -1315,6 +1328,23 @@ mod tests {
                 0xb3 => AddressingMode::IndirectY,
                 0xb7 => AddressingMode::ZeroPageY,
                 0xbf => AddressingMode::AbsoluteY,
+                _ => panic!("invalid opcode has been specified")
+            });
+            assert_eq!(instruction.support, Support::Illegal);
+        }
+    }
+
+    #[test]
+    fn whether_sax_instruction_was_created_from_opcode() {
+        let opcodes = [0x83u8,0x87u8,0x8fu8,0x97u8];
+        for op in opcodes {
+            let instruction = Instruction::from(op);
+            assert_eq!(instruction.opcode, Opcode::SAX);
+            assert_eq!(instruction.addressing_mode, match op {
+                0x83 => AddressingMode::IndirectX,
+                0x87 => AddressingMode::ZeroPage,
+                0x8f => AddressingMode::Absolute,
+                0x97 => AddressingMode::ZeroPageY,
                 _ => panic!("invalid opcode has been specified")
             });
             assert_eq!(instruction.support, Support::Illegal);
