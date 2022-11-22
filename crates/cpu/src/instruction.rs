@@ -116,6 +116,7 @@ impl Instruction {
             0x16 => Instruction::asl(AddressingMode::ZeroPageX),
             0x18 => Instruction::clc(AddressingMode::Implied),
             0x19 => Instruction::ora(AddressingMode::AbsoluteY),
+            0x1a => Instruction::nop(AddressingMode::Implied, Support::Illegal),
             0x1d => Instruction::ora(AddressingMode::AbsoluteX),
             0x1e => Instruction::asl(AddressingMode::AbsoluteX),
             0x20 => Instruction::jsr(AddressingMode::Absolute),
@@ -135,6 +136,7 @@ impl Instruction {
             0x36 => Instruction::rol(AddressingMode::ZeroPageX),
             0x38 => Instruction::sec(AddressingMode::Implied),
             0x39 => Instruction::and(AddressingMode::AbsoluteY),
+            0x3a => Instruction::nop(AddressingMode::Implied, Support::Illegal),
             0x3d => Instruction::and(AddressingMode::AbsoluteX),
             0x3e => Instruction::rol(AddressingMode::AbsoluteX),
             0x40 => Instruction::rti(AddressingMode::Implied),
@@ -154,6 +156,7 @@ impl Instruction {
             0x56 => Instruction::lsr(AddressingMode::ZeroPageX),
             0x58 => Instruction::cli(AddressingMode::Implied),
             0x59 => Instruction::eor(AddressingMode::AbsoluteY),
+            0x5a => Instruction::nop(AddressingMode::Implied, Support::Illegal),
             0x5d => Instruction::eor(AddressingMode::AbsoluteX),
             0x5e => Instruction::lsr(AddressingMode::AbsoluteX),
             0x60 => Instruction::rts(AddressingMode::Implied),
@@ -173,6 +176,7 @@ impl Instruction {
             0x76 => Instruction::ror(AddressingMode::ZeroPageX),
             0x78 => Instruction::sei(AddressingMode::Implied),
             0x79 => Instruction::adc(AddressingMode::AbsoluteY),
+            0x7a => Instruction::nop(AddressingMode::Implied, Support::Illegal),
             0x7d => Instruction::adc(AddressingMode::AbsoluteX),
             0x7e => Instruction::ror(AddressingMode::AbsoluteX),
             0x81 => Instruction::sta(AddressingMode::IndirectX),
@@ -244,6 +248,7 @@ impl Instruction {
             0xd6 => Instruction::dec(AddressingMode::ZeroPageX),
             0xd8 => Instruction::cld(AddressingMode::Implied),
             0xd9 => Instruction::cmp(AddressingMode::AbsoluteY),
+            0xda => Instruction::nop(AddressingMode::Implied, Support::Illegal),
             0xdd => Instruction::cmp(AddressingMode::AbsoluteX),
             0xde => Instruction::dec(AddressingMode::AbsoluteX),
             0xe0 => Instruction::cpx(AddressingMode::Immediate),
@@ -253,7 +258,7 @@ impl Instruction {
             0xe6 => Instruction::inc(AddressingMode::ZeroPage),
             0xe8 => Instruction::inx(AddressingMode::Implied),
             0xe9 => Instruction::sbc(AddressingMode::Immediate),
-            0xea => Instruction::nop(AddressingMode::Implied),
+            0xea => Instruction::nop(AddressingMode::Implied, Support::Official),
             0xec => Instruction::cpx(AddressingMode::Absolute),
             0xed => Instruction::sbc(AddressingMode::Absolute),
             0xee => Instruction::inc(AddressingMode::Absolute),
@@ -263,6 +268,7 @@ impl Instruction {
             0xf6 => Instruction::inc(AddressingMode::ZeroPageX),
             0xf8 => Instruction::sed(AddressingMode::Implied),
             0xf9 => Instruction::sbc(AddressingMode::AbsoluteY),
+            0xfa => Instruction::nop(AddressingMode::Implied, Support::Illegal),
             0xfd => Instruction::sbc(AddressingMode::AbsoluteX),
             0xfe => Instruction::inc(AddressingMode::AbsoluteX),
 
@@ -436,8 +442,8 @@ impl Instruction {
     }
 
     #[inline(always)]
-    fn nop(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::NOP, addressing_mode: mode, support: Support::Official }
+    fn nop(mode: AddressingMode, support: Support) -> Instruction {
+        Instruction { opcode: Opcode::NOP, addressing_mode: mode, support }
     }
 
     #[inline(always)]
@@ -1022,14 +1028,16 @@ mod tests {
 
     #[test]
     fn whether_nop_instruction_was_created_from_opcode() {
-        // TODO: A decision will be made later as to
-        //       whether the unofficial instruction should be implemented.
-        let opcodes = [0xeau8];
+        let opcodes = [0x1au8,0x3au8,0x5au8,0x7au8,0xdau8,0xeau8,0xfau8];
         for op in opcodes {
             let instruction = Instruction::from(op);
             assert_eq!(instruction.opcode, Opcode::NOP);
             assert_eq!(instruction.addressing_mode, AddressingMode::Implied);
-            assert_eq!(instruction.support, Support::Official);
+            assert_eq!(instruction.support, match op {
+                0xeau8 => Support::Official,
+                0x1au8|0x3au8|0x5au8|0x7au8|0xdau8|0xfau8 => Support::Illegal,
+                _ => panic!("invalid opcode has been specified")
+            });
         }
     }
 
