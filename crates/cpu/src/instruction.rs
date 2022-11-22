@@ -62,6 +62,7 @@ pub enum Opcode {
     ALR,
     ANC,
     ARR,
+    AXS,
 }
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
@@ -221,6 +222,7 @@ impl Instruction {
             0xc8 => Instruction::iny(AddressingMode::Implied),
             0xc9 => Instruction::cmp(AddressingMode::Immediate),
             0xca => Instruction::dex(AddressingMode::Implied),
+            0xcb => Instruction::axs(AddressingMode::Immediate, Support::Illegal),
             0xcc => Instruction::cpy(AddressingMode::Absolute),
             0xcd => Instruction::cmp(AddressingMode::Absolute),
             0xce => Instruction::dec(AddressingMode::Absolute),
@@ -558,6 +560,14 @@ impl Instruction {
         // by setting the instruction table.
         debug_assert!(support == Support::Illegal);
         Instruction { opcode: Opcode::ARR, addressing_mode: mode, support }
+    }
+
+    #[inline(always)]
+    fn axs(mode: AddressingMode, support: Support) -> Instruction {
+        // Indicate that the instruction is an informal instruction
+        // by setting the instruction table.
+        debug_assert!(support == Support::Illegal);
+        Instruction { opcode: Opcode::AXS, addressing_mode: mode, support }
     }
 }
 
@@ -1265,6 +1275,14 @@ mod tests {
     fn whether_arr_instruction_was_created_from_opcode() {
         let instruction = Instruction::from(0x6bu8);
         assert_eq!(instruction.opcode, Opcode::ARR);
+        assert_eq!(instruction.addressing_mode, AddressingMode::Immediate);
+        assert_eq!(instruction.support, Support::Illegal);
+    }
+
+    #[test]
+    fn whether_axs_instruction_was_created_from_opcode() {
+        let instruction = Instruction::from(0xcbu8);
+        assert_eq!(instruction.opcode, Opcode::AXS);
         assert_eq!(instruction.addressing_mode, AddressingMode::Immediate);
         assert_eq!(instruction.support, Support::Illegal);
     }
