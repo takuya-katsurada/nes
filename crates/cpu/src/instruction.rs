@@ -98,510 +98,132 @@ pub struct Instruction {
 }
 
 impl Instruction {
-    pub fn from(opcode: u8) -> Instruction {
-        match opcode {
-            0x00 => Instruction::brk(AddressingMode::Implied),
-            0x01 => Instruction::ora(AddressingMode::IndirectX),
-            0x05 => Instruction::ora(AddressingMode::ZeroPage),
-            0x06 => Instruction::asl(AddressingMode::ZeroPage),
-            0x08 => Instruction::php(AddressingMode::Implied),
-            0x09 => Instruction::ora(AddressingMode::Immediate),
-            0x0a => Instruction::asl(AddressingMode::Accumulator),
-            0x0b => Instruction::anc(AddressingMode::Immediate, Support::Illegal),
-            0x0d => Instruction::ora(AddressingMode::Absolute),
-            0x0e => Instruction::asl(AddressingMode::Absolute),
-            0x10 => Instruction::bpl(AddressingMode::Relative),
-            0x11 => Instruction::ora(AddressingMode::IndirectY),
-            0x15 => Instruction::ora(AddressingMode::ZeroPageX),
-            0x16 => Instruction::asl(AddressingMode::ZeroPageX),
-            0x18 => Instruction::clc(AddressingMode::Implied),
-            0x19 => Instruction::ora(AddressingMode::AbsoluteY),
-            0x1a => Instruction::nop(AddressingMode::Implied, Support::Illegal),
-            0x1d => Instruction::ora(AddressingMode::AbsoluteX),
-            0x1e => Instruction::asl(AddressingMode::AbsoluteX),
-            0x20 => Instruction::jsr(AddressingMode::Absolute),
-            0x21 => Instruction::and(AddressingMode::IndirectX),
-            0x24 => Instruction::bit(AddressingMode::ZeroPage),
-            0x25 => Instruction::and(AddressingMode::ZeroPage),
-            0x26 => Instruction::rol(AddressingMode::ZeroPage),
-            0x28 => Instruction::plp(AddressingMode::Implied),
-            0x29 => Instruction::and(AddressingMode::Immediate),
-            0x2a => Instruction::rol(AddressingMode::Accumulator),
-            0x2c => Instruction::bit(AddressingMode::Absolute),
-            0x2d => Instruction::and(AddressingMode::Absolute),
-            0x2e => Instruction::rol(AddressingMode::Absolute),
-            0x30 => Instruction::bmi(AddressingMode::Relative),
-            0x31 => Instruction::and(AddressingMode::IndirectY),
-            0x35 => Instruction::and(AddressingMode::ZeroPageX),
-            0x36 => Instruction::rol(AddressingMode::ZeroPageX),
-            0x38 => Instruction::sec(AddressingMode::Implied),
-            0x39 => Instruction::and(AddressingMode::AbsoluteY),
-            0x3a => Instruction::nop(AddressingMode::Implied, Support::Illegal),
-            0x3d => Instruction::and(AddressingMode::AbsoluteX),
-            0x3e => Instruction::rol(AddressingMode::AbsoluteX),
-            0x40 => Instruction::rti(AddressingMode::Implied),
-            0x41 => Instruction::eor(AddressingMode::IndirectX),
-            0x45 => Instruction::eor(AddressingMode::ZeroPage),
-            0x46 => Instruction::lsr(AddressingMode::ZeroPage),
-            0x48 => Instruction::pha(AddressingMode::Implied),
-            0x49 => Instruction::eor(AddressingMode::Immediate),
-            0x4a => Instruction::lsr(AddressingMode::Accumulator),
-            0x4b => Instruction::alr(AddressingMode::Immediate, Support::Illegal),
-            0x4c => Instruction::jmp(AddressingMode::Absolute),
-            0x4d => Instruction::eor(AddressingMode::Absolute),
-            0x4e => Instruction::lsr(AddressingMode::Absolute),
-            0x50 => Instruction::bvc(AddressingMode::Relative),
-            0x51 => Instruction::eor(AddressingMode::IndirectY),
-            0x55 => Instruction::eor(AddressingMode::ZeroPageX),
-            0x56 => Instruction::lsr(AddressingMode::ZeroPageX),
-            0x58 => Instruction::cli(AddressingMode::Implied),
-            0x59 => Instruction::eor(AddressingMode::AbsoluteY),
-            0x5a => Instruction::nop(AddressingMode::Implied, Support::Illegal),
-            0x5d => Instruction::eor(AddressingMode::AbsoluteX),
-            0x5e => Instruction::lsr(AddressingMode::AbsoluteX),
-            0x60 => Instruction::rts(AddressingMode::Implied),
-            0x61 => Instruction::adc(AddressingMode::IndirectX),
-            0x65 => Instruction::adc(AddressingMode::ZeroPage),
-            0x66 => Instruction::ror(AddressingMode::ZeroPage),
-            0x68 => Instruction::pla(AddressingMode::Implied),
-            0x69 => Instruction::adc(AddressingMode::Immediate),
-            0x6a => Instruction::ror(AddressingMode::Accumulator),
-            0x6b => Instruction::arr(AddressingMode::Immediate, Support::Illegal),
-            0x6c => Instruction::jmp(AddressingMode::Indirect),
-            0x6d => Instruction::adc(AddressingMode::Absolute),
-            0x6e => Instruction::ror(AddressingMode::Absolute),
-            0x70 => Instruction::bvs(AddressingMode::Relative),
-            0x71 => Instruction::adc(AddressingMode::IndirectY),
-            0x75 => Instruction::adc(AddressingMode::ZeroPageX),
-            0x76 => Instruction::ror(AddressingMode::ZeroPageX),
-            0x78 => Instruction::sei(AddressingMode::Implied),
-            0x79 => Instruction::adc(AddressingMode::AbsoluteY),
-            0x7a => Instruction::nop(AddressingMode::Implied, Support::Illegal),
-            0x7d => Instruction::adc(AddressingMode::AbsoluteX),
-            0x7e => Instruction::ror(AddressingMode::AbsoluteX),
-            0x81 => Instruction::sta(AddressingMode::IndirectX),
-            0x83 => Instruction::sax(AddressingMode::IndirectX, Support::Illegal),
-            0x84 => Instruction::sty(AddressingMode::ZeroPage),
-            0x85 => Instruction::sta(AddressingMode::ZeroPage),
-            0x86 => Instruction::stx(AddressingMode::ZeroPage),
-            0x87 => Instruction::sax(AddressingMode::ZeroPage, Support::Illegal),
-            0x88 => Instruction::dey(AddressingMode::Implied),
-            0x8a => Instruction::txa(AddressingMode::Implied),
-            0x8c => Instruction::sty(AddressingMode::Absolute),
-            0x8d => Instruction::sta(AddressingMode::Absolute),
-            0x8e => Instruction::stx(AddressingMode::Absolute),
-            0x8f => Instruction::sax(AddressingMode::Absolute, Support::Illegal),
-            0x90 => Instruction::bcc(AddressingMode::Relative),
-            0x91 => Instruction::sta(AddressingMode::IndirectY),
-            0x94 => Instruction::sty(AddressingMode::ZeroPageX),
-            0x95 => Instruction::sta(AddressingMode::ZeroPageX),
-            0x96 => Instruction::stx(AddressingMode::ZeroPageY),
-            0x97 => Instruction::sax(AddressingMode::ZeroPageY, Support::Illegal),
-            0x98 => Instruction::tya(AddressingMode::Implied),
-            0x99 => Instruction::sta(AddressingMode::AbsoluteY),
-            0x9a => Instruction::txs(AddressingMode::Implied),
-            0x9d => Instruction::sta(AddressingMode::AbsoluteX),
-            0xa0 => Instruction::ldy(AddressingMode::Immediate),
-            0xa1 => Instruction::lda(AddressingMode::IndirectX),
-            0xa2 => Instruction::ldx(AddressingMode::Immediate),
-            0xa3 => Instruction::lax(AddressingMode::IndirectX, Support::Illegal),
-            0xa4 => Instruction::ldy(AddressingMode::ZeroPage),
-            0xa5 => Instruction::lda(AddressingMode::ZeroPage),
-            0xa6 => Instruction::ldx(AddressingMode::ZeroPage),
-            0xa7 => Instruction::lax(AddressingMode::ZeroPage, Support::Illegal),
-            0xa8 => Instruction::tay(AddressingMode::Implied),
-            0xa9 => Instruction::lda(AddressingMode::Immediate),
-            0xaa => Instruction::tax(AddressingMode::Implied),
-            0xac => Instruction::ldy(AddressingMode::Absolute),
-            0xad => Instruction::lda(AddressingMode::Absolute),
-            0xae => Instruction::ldx(AddressingMode::Absolute),
-            0xaf => Instruction::lax(AddressingMode::Absolute, Support::Illegal),
-            0xb0 => Instruction::bcs(AddressingMode::Relative),
-            0xb1 => Instruction::lda(AddressingMode::IndirectY),
-            0xb3 => Instruction::lax(AddressingMode::IndirectY, Support::Illegal),
-            0xb4 => Instruction::ldy(AddressingMode::ZeroPageX),
-            0xb5 => Instruction::lda(AddressingMode::ZeroPageX),
-            0xb6 => Instruction::ldx(AddressingMode::ZeroPageY),
-            0xb7 => Instruction::lax(AddressingMode::ZeroPageY, Support::Illegal),
-            0xb8 => Instruction::clv(AddressingMode::Implied),
-            0xb9 => Instruction::lda(AddressingMode::AbsoluteY),
-            0xba => Instruction::tsx(AddressingMode::Implied),
-            0xbc => Instruction::ldy(AddressingMode::AbsoluteX),
-            0xbd => Instruction::lda(AddressingMode::AbsoluteX),
-            0xbe => Instruction::ldx(AddressingMode::AbsoluteY),
-            0xbf => Instruction::lax(AddressingMode::AbsoluteY, Support::Illegal),
-            0xc0 => Instruction::cpy(AddressingMode::Immediate),
-            0xc1 => Instruction::cmp(AddressingMode::IndirectX),
-            0xc4 => Instruction::cpy(AddressingMode::ZeroPage),
-            0xc5 => Instruction::cmp(AddressingMode::ZeroPage),
-            0xc6 => Instruction::dec(AddressingMode::ZeroPage),
-            0xc8 => Instruction::iny(AddressingMode::Implied),
-            0xc9 => Instruction::cmp(AddressingMode::Immediate),
-            0xca => Instruction::dex(AddressingMode::Implied),
-            0xcb => Instruction::axs(AddressingMode::Immediate, Support::Illegal),
-            0xcc => Instruction::cpy(AddressingMode::Absolute),
-            0xcd => Instruction::cmp(AddressingMode::Absolute),
-            0xce => Instruction::dec(AddressingMode::Absolute),
-            0xd0 => Instruction::bne(AddressingMode::Relative),
-            0xd1 => Instruction::cmp(AddressingMode::IndirectY),
-            0xd5 => Instruction::cmp(AddressingMode::ZeroPageX),
-            0xd6 => Instruction::dec(AddressingMode::ZeroPageX),
-            0xd8 => Instruction::cld(AddressingMode::Implied),
-            0xd9 => Instruction::cmp(AddressingMode::AbsoluteY),
-            0xda => Instruction::nop(AddressingMode::Implied, Support::Illegal),
-            0xdd => Instruction::cmp(AddressingMode::AbsoluteX),
-            0xde => Instruction::dec(AddressingMode::AbsoluteX),
-            0xe0 => Instruction::cpx(AddressingMode::Immediate),
-            0xe1 => Instruction::sbc(AddressingMode::IndirectX),
-            0xe4 => Instruction::cpx(AddressingMode::ZeroPage),
-            0xe5 => Instruction::sbc(AddressingMode::ZeroPage),
-            0xe6 => Instruction::inc(AddressingMode::ZeroPage),
-            0xe8 => Instruction::inx(AddressingMode::Implied),
-            0xe9 => Instruction::sbc(AddressingMode::Immediate),
-            0xea => Instruction::nop(AddressingMode::Implied, Support::Official),
-            0xec => Instruction::cpx(AddressingMode::Absolute),
-            0xed => Instruction::sbc(AddressingMode::Absolute),
-            0xee => Instruction::inc(AddressingMode::Absolute),
-            0xf0 => Instruction::beq(AddressingMode::Relative),
-            0xf1 => Instruction::sbc(AddressingMode::IndirectY),
-            0xf5 => Instruction::sbc(AddressingMode::ZeroPageX),
-            0xf6 => Instruction::inc(AddressingMode::ZeroPageX),
-            0xf8 => Instruction::sed(AddressingMode::Implied),
-            0xf9 => Instruction::sbc(AddressingMode::AbsoluteY),
-            0xfa => Instruction::nop(AddressingMode::Implied, Support::Illegal),
-            0xfd => Instruction::sbc(AddressingMode::AbsoluteX),
-            0xfe => Instruction::inc(AddressingMode::AbsoluteX),
+    pub fn from(op: u8) -> Instruction {
+        let opcode = Instruction::make_opcode(op);
+        let addressing_mode = Instruction::make_addressing_mode(op);
+        let support = Instruction::make_support(op);
 
-            _ => panic!("unsupported CPU instruction:{:08x}", opcode),
+        Instruction { opcode, addressing_mode, support }
+    }
+
+    #[inline(always)]
+    fn make_opcode(op: u8) -> Opcode {
+        return match op {
+            0x61|0x65|0x69|0x6d|0x71|0x75|0x79|0x7d => Opcode::ADC,
+            0x21|0x25|0x29|0x2d|0x31|0x35|0x39|0x3d => Opcode::AND,
+            0x06|0x0a|0x0e|0x16|0x1e                => Opcode::ASL,
+            0x90                                    => Opcode::BCC,
+            0xb0                                    => Opcode::BCS,
+            0xf0                                    => Opcode::BEQ,
+            0x24|0x2c                               => Opcode::BIT,
+            0x30                                    => Opcode::BMI,
+            0xd0                                    => Opcode::BNE,
+            0x10                                    => Opcode::BPL,
+            0x00                                    => Opcode::BRK,
+            0x50                                    => Opcode::BVC,
+            0x70                                    => Opcode::BVS,
+            0x18                                    => Opcode::CLC,
+            0xd8                                    => Opcode::CLD,
+            0x58                                    => Opcode::CLI,
+            0xb8                                    => Opcode::CLV,
+            0xc1|0xc5|0xc9|0xcd|0xd1|0xd5|0xd9|0xdd => Opcode::CMP,
+            0xe0|0xe4|0xec                          => Opcode::CPX,
+            0xc0|0xc4|0xcc                          => Opcode::CPY,
+            0xc6|0xce|0xd6|0xde                     => Opcode::DEC,
+            0xca                                    => Opcode::DEX,
+            0x88                                    => Opcode::DEY,
+            0x41|0x45|0x49|0x4d|0x51|0x55|0x59|0x5d => Opcode::EOR,
+            0xe6|0xee|0xf6|0xfe                     => Opcode::INC,
+            0xe8                                    => Opcode::INX,
+            0xc8                                    => Opcode::INY,
+            0x4c|0x6c                               => Opcode::JMP,
+            0x20                                    => Opcode::JSR,
+            0xa1|0xa5|0xa9|0xad|0xb1|0xb5|0xb9|0xbd => Opcode::LDA,
+            0xa2|0xa6|0xae|0xb6|0xbe                => Opcode::LDX,
+            0xa0|0xa4|0xac|0xb4|0xbc                => Opcode::LDY,
+            0x46|0x4a|0x4e|0x56|0x5e                => Opcode::LSR,
+            0x1a|0x3a|0x5a|0x7a|0xda|0xea|0xfa      => Opcode::NOP,
+            0x01|0x05|0x09|0x0d|0x11|0x15|0x19|0x1d => Opcode::ORA,
+            0x48                                    => Opcode::PHA,
+            0x08                                    => Opcode::PHP,
+            0x68                                    => Opcode::PLA,
+            0x28                                    => Opcode::PLP,
+            0x26|0x2a|0x2e|0x36|0x3e                => Opcode::ROL,
+            0x66|0x6a|0x6e|0x76|0x7e                => Opcode::ROR,
+            0x40                                    => Opcode::RTI,
+            0x60                                    => Opcode::RTS,
+            0xe1|0xe5|0xe9|0xed|0xf1|0xf5|0xf9|0xfd => Opcode::SBC,
+            0x38                                    => Opcode::SEC,
+            0xf8                                    => Opcode::SED,
+            0x78                                    => Opcode::SEI,
+            0x81|0x85|0x8d|0x91|0x95|0x99|0x9d      => Opcode::STA,
+            0x86|0x8e|0x96                          => Opcode::STX,
+            0x84|0x8c|0x94                          => Opcode::STY,
+            0xaa                                    => Opcode::TAX,
+            0xa8                                    => Opcode::TAY,
+            0xba                                    => Opcode::TSX,
+            0x8a                                    => Opcode::TXA,
+            0x9a                                    => Opcode::TXS,
+            0x98                                    => Opcode::TYA,
+
+            0x4b                                    => Opcode::ALR,
+            0x0b                                    => Opcode::ANC,
+            0x6b                                    => Opcode::ARR,
+            0xcb                                    => Opcode::AXS,
+            0xa3|0xa7|0xaf|0xb3|0xb7|0xbf           => Opcode::LAX,
+            0x83|0x87|0x8f|0x97                     => Opcode::SAX,
+
+            _ => panic!("unsupported CPU instruction:{:08x}", op),
         }
     }
 
     #[inline(always)]
-    fn adc(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::ADC, addressing_mode: mode, support: Support::Official }
+    fn make_addressing_mode(op: u8) -> AddressingMode {
+        return match op {
+            0x00|0x08|0x18|0x1a|0x28|0x38|0x3a|0x40|0x48|0x58|0x5a|0x60|0x68|0x78|0x7a|
+            0x88|0x8a|0x98|0x9a|0xa8|0xaa|0xb8|0xba|0xc8|0xca|0xd8|0xda|0xe8|0xea|0xf8|
+            0xfa
+            => AddressingMode::Implied,
+            0x0a|0x2a|0x4a|0x6a
+            => AddressingMode::Accumulator,
+            0x09|0x0b|0x29|0x49|0x4b|0x69|0x6b|0xa0|0xa2|0xa9|0xc0|0xc9|0xcb|0xe0|0xe9
+            => AddressingMode::Immediate,
+            0x05|0x06|0x24|0x25|0x26|0x45|0x46|0x65|0x66|0x84|0x85|0x86|0x87|0xa4|0xa5|
+            0xa6|0xa7|0xc4|0xc5|0xc6|0xe4|0xe5|0xe6
+            => AddressingMode::ZeroPage,
+            0x15|0x16|0x35|0x36|0x55|0x56|0x75|0x76|0x94|0x95|0xb4|0xb5|0xd5|0xd6|0xf5|
+            0xf6
+            => AddressingMode::ZeroPageX,
+            0x96|0x97|0xb6|0xb7
+            => AddressingMode::ZeroPageY,
+            0x0d|0x0e|0x20|0x2c|0x2d|0x2e|0x4c|0x4d|0x4e|0x6d|0x6e|0x8c|0x8d|0x8e|0x8f|
+            0xac|0xad|0xae|0xaf|0xcc|0xcd|0xce|0xec|0xed|0xee
+            => AddressingMode::Absolute,
+            0x1d|0x1e|0x3d|0x3e|0x5d|0x5e|0x7d|0x7e|0x9d|0xbc|0xbd|0xdd|0xde|0xfd| 0xfe
+            => AddressingMode::AbsoluteX,
+            0x19|0x39|0x59|0x79|0x99|0xb9|0xbe|0xbf|0xd9|0xf9
+            => AddressingMode::AbsoluteY,
+            0x6c
+            => AddressingMode::Indirect,
+            0x01|0x21|0x41|0x61|0x81|0x83|0xa1|0xa3|0xc1|0xe1
+            => AddressingMode::IndirectX,
+            0x11|0x31|0x51|0x71|0x91|0xb1|0xb3|0xd1|0xf1
+            => AddressingMode::IndirectY,
+            0x10|0x30|0x50|0x70|0x90|0xb0|0xd0|0xf0
+            => AddressingMode::Relative,
+            _ => panic!("unsupported CPU instruction:{:08x}", op),
+        }
     }
 
-    #[inline(always)]
-    fn and(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::AND, addressing_mode: mode, support: Support::Official }
-    }
 
     #[inline(always)]
-    fn asl(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::ASL, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn bit(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BIT, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn beq(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BEQ, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn bmi(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BMI, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn bne(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BNE, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn bpl(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BPL, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn brk(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BRK, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn bcc(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BCC, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn bcs(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BCS, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn bvc(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BVC, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn bvs(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::BVS, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn clc(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::CLC, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn cld(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::CLD, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn cli(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::CLI, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn clv(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::CLV, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn cmp(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::CMP, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn cpx(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::CPX, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn cpy(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::CPY, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn dec(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::DEC, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn dex(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::DEX, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn dey(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::DEY, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn eor(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::EOR, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn inc(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::INC, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn inx(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::INX, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn iny(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::INY, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn jmp(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::JMP, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn jsr(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::JSR, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn lda(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::LDA, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn ldx(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::LDX, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn ldy(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::LDY, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn lsr(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::LSR, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn nop(mode: AddressingMode, support: Support) -> Instruction {
-        Instruction { opcode: Opcode::NOP, addressing_mode: mode, support }
-    }
-
-    #[inline(always)]
-    fn ora(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::ORA, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn pha(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::PHA, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn php(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::PHP, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn pla(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::PLA, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn plp(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::PLP, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn rts(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::RTS, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn rol(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::ROL, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn ror(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::ROR, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn rti(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::RTI, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn sbc(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::SBC, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn sec(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::SEC, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn sed(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::SED, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn sei(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::SEI, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn sta(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::STA, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn stx(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::STX, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn sty(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::STY, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn txa(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::TXA, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn tax(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::TAX, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn tay(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::TAY, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn tsx(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::TSX, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn txs(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::TXS, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn tya(mode: AddressingMode) -> Instruction {
-        Instruction { opcode: Opcode::TYA, addressing_mode: mode, support: Support::Official }
-    }
-
-    #[inline(always)]
-    fn alr(mode: AddressingMode, support: Support) -> Instruction {
-        // Indicate that the instruction is an informal instruction
-        // by setting the instruction table.
-        debug_assert!(support == Support::Illegal);
-        Instruction { opcode: Opcode::ALR, addressing_mode: mode, support }
-    }
-
-    #[inline(always)]
-    fn anc(mode: AddressingMode, support: Support) -> Instruction {
-        // Indicate that the instruction is an informal instruction
-        // by setting the instruction table.
-        debug_assert!(support == Support::Illegal);
-        Instruction { opcode: Opcode::ANC, addressing_mode: mode, support }
-    }
-
-    #[inline(always)]
-    fn arr(mode: AddressingMode, support: Support) -> Instruction {
-        // Indicate that the instruction is an informal instruction
-        // by setting the instruction table.
-        debug_assert!(support == Support::Illegal);
-        Instruction { opcode: Opcode::ARR, addressing_mode: mode, support }
-    }
-
-    #[inline(always)]
-    fn axs(mode: AddressingMode, support: Support) -> Instruction {
-        // Indicate that the instruction is an informal instruction
-        // by setting the instruction table.
-        debug_assert!(support == Support::Illegal);
-        Instruction { opcode: Opcode::AXS, addressing_mode: mode, support }
-    }
-
-    #[inline(always)]
-    fn lax(mode: AddressingMode, support: Support) -> Instruction {
-        // Indicate that the instruction is an informal instruction
-        // by setting the instruction table.
-        debug_assert!(support == Support::Illegal);
-        Instruction { opcode: Opcode::LAX, addressing_mode: mode, support }
-    }
-
-    #[inline(always)]
-    fn sax(mode: AddressingMode, support: Support) -> Instruction {
-        // Indicate that the instruction is an informal instruction
-        // by setting the instruction table.
-        debug_assert!(support == Support::Illegal);
-        Instruction { opcode: Opcode::SAX, addressing_mode: mode, support }
+    fn make_support(op: u8) -> Support {
+        return match op {
+            0x0b|0x1a|0x3a|0x4b|0x5a|0x6b|0x7a|0x83|0x87|0x8f|0x97|0xa3|0xa7|0xaf|0xb3|
+            0xb7|0xbf|0xcb|0xda|0xfa
+            => Support::Illegal,
+            _   => Support::Official
+        }
     }
 }
 
