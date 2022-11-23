@@ -115,75 +115,75 @@ impl Instruction {
     #[inline(always)]
     fn make_opcode(op: u8) -> Opcode {
         return match op {
-            0x61|0x65|0x69|0x6d|0x71|0x75|0x79|0x7d => Opcode::ADC,
-            0x21|0x25|0x29|0x2d|0x31|0x35|0x39|0x3d => Opcode::AND,
-            0x06|0x0a|0x0e|0x16|0x1e                => Opcode::ASL,
-            0x90                                    => Opcode::BCC,
-            0xb0                                    => Opcode::BCS,
-            0xf0                                    => Opcode::BEQ,
-            0x24|0x2c                               => Opcode::BIT,
-            0x30                                    => Opcode::BMI,
-            0xd0                                    => Opcode::BNE,
-            0x10                                    => Opcode::BPL,
-            0x00                                    => Opcode::BRK,
-            0x50                                    => Opcode::BVC,
-            0x70                                    => Opcode::BVS,
-            0x18                                    => Opcode::CLC,
-            0xd8                                    => Opcode::CLD,
-            0x58                                    => Opcode::CLI,
-            0xb8                                    => Opcode::CLV,
-            0xc1|0xc5|0xc9|0xcd|0xd1|0xd5|0xd9|0xdd => Opcode::CMP,
-            0xe0|0xe4|0xec                          => Opcode::CPX,
-            0xc0|0xc4|0xcc                          => Opcode::CPY,
-            0xc6|0xce|0xd6|0xde                     => Opcode::DEC,
-            0xca                                    => Opcode::DEX,
-            0x88                                    => Opcode::DEY,
-            0x41|0x45|0x49|0x4d|0x51|0x55|0x59|0x5d => Opcode::EOR,
-            0xe6|0xee|0xf6|0xfe                     => Opcode::INC,
-            0xe8                                    => Opcode::INX,
-            0xc8                                    => Opcode::INY,
-            0x4c|0x6c                               => Opcode::JMP,
-            0x20                                    => Opcode::JSR,
-            0xa1|0xa5|0xa9|0xad|0xb1|0xb5|0xb9|0xbd => Opcode::LDA,
-            0xa2|0xa6|0xae|0xb6|0xbe                => Opcode::LDX,
-            0xa0|0xa4|0xac|0xb4|0xbc                => Opcode::LDY,
-            0x46|0x4a|0x4e|0x56|0x5e                => Opcode::LSR,
-            0x1a|0x3a|0x5a|0x7a|0xda|0xea|0xfa      => Opcode::NOP,
-            0x01|0x05|0x09|0x0d|0x11|0x15|0x19|0x1d => Opcode::ORA,
-            0x48                                    => Opcode::PHA,
-            0x08                                    => Opcode::PHP,
-            0x68                                    => Opcode::PLA,
-            0x28                                    => Opcode::PLP,
-            0x26|0x2a|0x2e|0x36|0x3e                => Opcode::ROL,
-            0x66|0x6a|0x6e|0x76|0x7e                => Opcode::ROR,
-            0x40                                    => Opcode::RTI,
-            0x60                                    => Opcode::RTS,
-            0xe1|0xe5|0xe9|0xed|0xf1|0xf5|0xf9|0xfd => Opcode::SBC,
-            0x38                                    => Opcode::SEC,
-            0xf8                                    => Opcode::SED,
-            0x78                                    => Opcode::SEI,
-            0x81|0x85|0x8d|0x91|0x95|0x99|0x9d      => Opcode::STA,
-            0x86|0x8e|0x96                          => Opcode::STX,
-            0x84|0x8c|0x94                          => Opcode::STY,
-            0xaa                                    => Opcode::TAX,
-            0xa8                                    => Opcode::TAY,
-            0xba                                    => Opcode::TSX,
-            0x8a                                    => Opcode::TXA,
-            0x9a                                    => Opcode::TXS,
-            0x98                                    => Opcode::TYA,
+            0x61|0x65|0x69|0x6d|0x71|0x75|0x79|0x7d      => Opcode::ADC,
+            0x21|0x25|0x29|0x2d|0x31|0x35|0x39|0x3d      => Opcode::AND,
+            0x06|0x0a|0x0e|0x16|0x1e                     => Opcode::ASL,
+            0x90                                         => Opcode::BCC,
+            0xb0                                         => Opcode::BCS,
+            0xf0                                         => Opcode::BEQ,
+            0x24|0x2c                                    => Opcode::BIT,
+            0x30                                         => Opcode::BMI,
+            0xd0                                         => Opcode::BNE,
+            0x10                                         => Opcode::BPL,
+            0x00                                         => Opcode::BRK,
+            0x50                                         => Opcode::BVC,
+            0x70                                         => Opcode::BVS,
+            0x18                                         => Opcode::CLC,
+            0xd8                                         => Opcode::CLD,
+            0x58                                         => Opcode::CLI,
+            0xb8                                         => Opcode::CLV,
+            0xc1|0xc5|0xc9|0xcd|0xd1|0xd5|0xd9|0xdd      => Opcode::CMP,
+            0xe0|0xe4|0xec                               => Opcode::CPX,
+            0xc0|0xc4|0xcc                               => Opcode::CPY,
+            0xc6|0xce|0xd6|0xde                          => Opcode::DEC,
+            0xca                                         => Opcode::DEX,
+            0x88                                         => Opcode::DEY,
+            0x41|0x45|0x49|0x4d|0x51|0x55|0x59|0x5d      => Opcode::EOR,
+            0xe6|0xee|0xf6|0xfe                          => Opcode::INC,
+            0xe8                                         => Opcode::INX,
+            0xc8                                         => Opcode::INY,
+            0x4c|0x6c                                    => Opcode::JMP,
+            0x20                                         => Opcode::JSR,
+            0xa1|0xa5|0xa9|0xad|0xb1|0xb5|0xb9|0xbd      => Opcode::LDA,
+            0xa2|0xa6|0xae|0xb6|0xbe                     => Opcode::LDX,
+            0xa0|0xa4|0xac|0xb4|0xbc                     => Opcode::LDY,
+            0x46|0x4a|0x4e|0x56|0x5e                     => Opcode::LSR,
+            0x1a|0x3a|0x5a|0x7a|0xda|0xea|0xfa           => Opcode::NOP,
+            0x01|0x05|0x09|0x0d|0x11|0x15|0x19|0x1d      => Opcode::ORA,
+            0x48                                         => Opcode::PHA,
+            0x08                                         => Opcode::PHP,
+            0x68                                         => Opcode::PLA,
+            0x28                                         => Opcode::PLP,
+            0x26|0x2a|0x2e|0x36|0x3e                     => Opcode::ROL,
+            0x66|0x6a|0x6e|0x76|0x7e                     => Opcode::ROR,
+            0x40                                         => Opcode::RTI,
+            0x60                                         => Opcode::RTS,
+            0xe1|0xe5|0xe9|0xeb|0xed|0xf1|0xf5|0xf9|0xfd => Opcode::SBC,
+            0x38                                         => Opcode::SEC,
+            0xf8                                         => Opcode::SED,
+            0x78                                         => Opcode::SEI,
+            0x81|0x85|0x8d|0x91|0x95|0x99|0x9d           => Opcode::STA,
+            0x86|0x8e|0x96                               => Opcode::STX,
+            0x84|0x8c|0x94                               => Opcode::STY,
+            0xaa                                         => Opcode::TAX,
+            0xa8                                         => Opcode::TAY,
+            0xba                                         => Opcode::TSX,
+            0x8a                                         => Opcode::TXA,
+            0x9a                                         => Opcode::TXS,
+            0x98                                         => Opcode::TYA,
 
-            0x4b                                    => Opcode::ALR,
-            0x0b                                    => Opcode::ANC,
-            0x6b                                    => Opcode::ARR,
-            0xcb                                    => Opcode::AXS,
-            0xc3|0xc7|0xcf|0xd3|0xd7|0xdb|0xdf      => Opcode::DCP,
-            0xe3|0xe7|0xef|0xf3|0xf7|0xfb|0xff      => Opcode::ISC,
-            0xa3|0xa7|0xaf|0xb3|0xb7|0xbf           => Opcode::LAX,
-            0x23|0x27|0x2f|0x33|0x37|0x3b|0x3f      => Opcode::RLA,
-            0x63|0x67|0x6f|0x73|0x77|0x7b|0x7f      => Opcode::RRA,
-            0x83|0x87|0x8f|0x97                     => Opcode::SAX,
-            0x03|0x07|0x0f|0x13|0x17|0x1b|0x1f      => Opcode::SLO,
-            0x43|0x47|0x4f|0x53|0x57|0x5b|0x5f      => Opcode::SRE,
+            0x4b                                         => Opcode::ALR,
+            0x0b                                         => Opcode::ANC,
+            0x6b                                         => Opcode::ARR,
+            0xcb                                         => Opcode::AXS,
+            0xc3|0xc7|0xcf|0xd3|0xd7|0xdb|0xdf           => Opcode::DCP,
+            0xe3|0xe7|0xef|0xf3|0xf7|0xfb|0xff           => Opcode::ISC,
+            0xa3|0xa7|0xaf|0xb3|0xb7|0xbf                => Opcode::LAX,
+            0x23|0x27|0x2f|0x33|0x37|0x3b|0x3f           => Opcode::RLA,
+            0x63|0x67|0x6f|0x73|0x77|0x7b|0x7f           => Opcode::RRA,
+            0x83|0x87|0x8f|0x97                          => Opcode::SAX,
+            0x03|0x07|0x0f|0x13|0x17|0x1b|0x1f           => Opcode::SLO,
+            0x43|0x47|0x4f|0x53|0x57|0x5b|0x5f           => Opcode::SRE,
 
             _ => panic!("unsupported CPU instruction:{:08x}", op),
         }
@@ -198,7 +198,7 @@ impl Instruction {
             => AddressingMode::Implied,
             0x0a|0x2a|0x4a|0x6a
             => AddressingMode::Accumulator,
-            0x09|0x0b|0x29|0x49|0x4b|0x69|0x6b|0xa0|0xa2|0xa9|0xc0|0xc9|0xcb|0xe0|0xe9
+            0x09|0x0b|0x29|0x49|0x4b|0x69|0x6b|0xa0|0xa2|0xa9|0xc0|0xc9|0xcb|0xe0|0xe9|0xeb
             => AddressingMode::Immediate,
             0x05|0x06|0x07|0x24|0x25|0x26|0x27|0x45|0x46|0x47|0x65|0x66|0x67|0x84|0x85|0x86|
             0x87|0xa4|0xa5|0xa6|0xa7|0xc4|0xc5|0xc6|0xc7|0xe4|0xe5|0xe6|0xe7
@@ -234,7 +234,7 @@ impl Instruction {
             0x03|0x07|0x0b|0x0f|0x13|0x17|0x1a|0x1b|0x1f|0x23|0x27|0x2f|0x33|0x37|0x3a|0x3b|
             0x3f|0x43|0x47|0x4b|0x4f|0x53|0x57|0x5a|0x5b|0x5f|0x63|0x67|0x6b|0x6f|0x73|0x77|
             0x7a|0x7b|0x7f|0x83|0x87|0x8f|0x97|0xa3|0xa7|0xaf|0xb3|0xb7|0xbf|0xc3|0xc7|0xcb|
-            0xcf|0xd3|0xd7|0xda|0xdb|0xdf|0xfa|0xe3|0xe7|0xef|0xf3|0xf7|0xfb|0xff
+            0xcf|0xd3|0xd7|0xda|0xdb|0xdf|0xfa|0xe3|0xe7|0xeb|0xef|0xf3|0xf7|0xfb|0xff
                => Support::Illegal,
             _  => Support::Official
         }
@@ -784,22 +784,26 @@ mod tests {
 
     #[test]
     fn whether_sbc_instruction_was_created_from_opcode() {
-        let opcodes = [0xe1u8,0xe5u8,0xe9u8,0xedu8,0xf1u8,0xf5u8,0xf9u8,0xfdu8];
+        let opcodes = [0xe1u8,0xe5u8,0xe9u8,0xebu8,0xedu8,0xf1u8,0xf5u8,0xf9u8,0xfdu8];
         for op in opcodes {
             let instruction = Instruction::from(op);
             assert_eq!(instruction.opcode, Opcode::SBC);
             assert_eq!(instruction.addressing_mode, match op {
-                0xe9 => AddressingMode::Immediate,
-                0xe5 => AddressingMode::ZeroPage,
-                0xf5 => AddressingMode::ZeroPageX,
-                0xed => AddressingMode::Absolute,
-                0xfd => AddressingMode::AbsoluteX,
-                0xf9 => AddressingMode::AbsoluteY,
-                0xe1 => AddressingMode::IndirectX,
-                0xf1 => AddressingMode::IndirectY,
+                0xe9|0xeb => AddressingMode::Immediate,
+                0xe5      => AddressingMode::ZeroPage,
+                0xf5      => AddressingMode::ZeroPageX,
+                0xed      => AddressingMode::Absolute,
+                0xfd      => AddressingMode::AbsoluteX,
+                0xf9      => AddressingMode::AbsoluteY,
+                0xe1      => AddressingMode::IndirectX,
+                0xf1      => AddressingMode::IndirectY,
                 _ => panic!("invalid opcode has been specified")
             });
-            assert_eq!(instruction.support, Support::Official);
+            assert_eq!(instruction.support, match op {
+                0xeb => Support::Illegal,
+                0xe1|0xe5|0xe9|0xed|0xf1|0xf5|0xf9|0xfd => Support::Official,
+                _ => panic!("invalid opcode has been specified")
+            });
         }
     }
 
