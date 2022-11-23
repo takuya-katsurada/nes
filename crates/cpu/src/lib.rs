@@ -392,6 +392,11 @@ impl Cpu {
                 2
             }
 
+            Opcode::SKB => {
+                let operand = self.fetch(system, mode);
+                1 + operand.cycle
+            }
+
             _ => panic!("invalid opcode has been specified")
         }
     }
@@ -1494,4 +1499,17 @@ mod tests {
         }
     }
 
+    # [test]
+    fn execute_skb_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x80u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.pc, 0x0002u16);
+        assert_eq!(cycle, 0x02u8);
+    }
 }
