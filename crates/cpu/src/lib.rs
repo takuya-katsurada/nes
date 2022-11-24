@@ -392,6 +392,10 @@ impl Cpu {
                 2
             }
 
+            Opcode::IGN => {
+                let operand = self.fetch(system, mode);
+                1 + operand.cycle
+            }
             Opcode::SKB => {
                 let operand = self.fetch(system, mode);
                 1 + operand.cycle
@@ -1496,6 +1500,27 @@ mod tests {
             assert_eq!(cpu.read_zero_flag(), param.2);
             assert_eq!(cpu.read_negative_flag(), param.3);
             assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_ign_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x04, 0x0002, 0x03),
+            (0x14, 0x0002, 0x04),
+            (0x0c, 0x0003, 0x04),
+            (0x1c, 0x0003, 0x04),
+        ] {
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, param.0);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.pc, param.1);
+            assert_eq!(cycle, param.2);
         }
     }
 
