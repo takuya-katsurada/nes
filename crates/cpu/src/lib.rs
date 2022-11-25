@@ -343,6 +343,20 @@ impl Cpu {
                     3 + operand.cycle
                 }
             }
+            Opcode::SBC => {
+                let operand = self.fetch(system, mode);
+                let (v, c1) = self.a.overflowing_sub(operand.data);
+                let (result, c2) = v.overflowing_sub(
+                    if self.read_carry_flag(){ 0 } else { 1 }
+                );
+
+                let of = (((self.a ^ operand.data) & 0x80) == 0x80) && (((self.a ^ result) & 0x80) == 0x80);
+                self.write_carry_flag(!(c1 || c2));
+                self.write_negative_flag(of);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                1 + operand.cycle
+            }
             Opcode::SEC => {
                 self.write_carry_flag(true);
                 2
@@ -1310,6 +1324,31 @@ mod tests {
         }
     }
 
+    # [test]
+    fn execute_sbc_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x03, 0x01, false, 0x01, true, false, false),
+            (0x02, 0x01, false, 0x00, true, true, false),
+            (0x82, 0x01, false, 0x80, true, false, true),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            cpu.write_carry_flag(param.2);
+            mem.write_u8(0x0000, 0xe9);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.3);
+            assert_eq!(cpu.read_carry_flag(), param.4);
+            assert_eq!(cpu.read_zero_flag(), param.5);
+            assert_eq!(cpu.read_negative_flag(), param.6);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
 
     # [test]
     fn execute_sec_instruction()
