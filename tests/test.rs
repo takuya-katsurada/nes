@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use rom::Rom;
+    use nes::Nes;
     use std::fs::File;
     use std::io::Read;
 
@@ -11,11 +11,11 @@ mod tests {
         let mut contents = vec![];
         file.read_to_end(&mut contents);
 
-        let isValid = Rom::isValid(&mut contents);
-        let rom = Rom::new(contents);
-        assert!(isValid);
-        assert_eq!(rom.prg_rom_bytes, 1);
-        assert_eq!(rom.chr_rom_bytes, 1);
+        let nes = Nes::from(&mut contents).unwrap();
+
+        let snapshot = nes.snapshot();
+        assert_eq!(snapshot.prg_rom_bytes, 1);
+        assert_eq!(snapshot.chr_rom_bytes, 1);
         Ok(())
     }
 }
