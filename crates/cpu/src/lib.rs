@@ -45,6 +45,19 @@ impl Cpu {
         let mode = instruction.addressing_mode;
 
         match opcode {
+            Opcode::ADC => {
+                let operand = self.fetch(system, mode);
+                let v = u16::from(self.a) + u16::from(operand.data) +
+                    (if self.read_carry_flag() { 1 } else { 0 });
+                let result = (v & 0xff) as u8;
+
+                let of = ((self.a ^ result) & (operand.data ^ result) & 0x80u8) == 0x80u8;
+                self.write_carry_flag(v > 0x00ffu16);
+                self.write_overflow_flag(of);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                1 + operand.cycle
+            }
             Opcode::AND => {
                 let operand = self.fetch(system, mode);
                 let result = self.a & operand.data;
@@ -415,6 +428,34 @@ impl Cpu {
 #[cfg(test)]
 mod tests {
     use memory::system::SystemBus;
+
+    # [test]
+    fn execute_adc_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x00, 0x01, false, 0x01, false, false, false),
+            (0x00, 0x00, false, 0x00, false, true, false),
+            (0x80, 0x01, false, 0x81, false, false, true),
+            (0x00, 0x01, true, 0x02, false, false, false),
+            (0xff, 0x01, true, 0x01, true, false, false),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            cpu.write_carry_flag(param.2);
+            mem.write_u8(0x0000, 0x69);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.3);
+            assert_eq!(cpu.read_carry_flag(), param.4);
+            assert_eq!(cpu.read_zero_flag(), param.5);
+            assert_eq!(cpu.read_negative_flag(), param.6);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
 
     # [test]
     fn execute_and_instruction()
