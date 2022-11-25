@@ -423,6 +423,15 @@ impl Cpu {
                 let operand = self.fetch(system, mode);
                 1 + operand.cycle
             }
+            Opcode::LAX => {
+                let operand = self.fetch(system, mode);
+                let result = operand.data;
+
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                self.x = result;
+                1 + operand.cycle
+            }
             Opcode::SKB => {
                 let operand = self.fetch(system, mode);
                 1 + operand.cycle
@@ -1601,6 +1610,33 @@ mod tests {
             let cycle = cpu.step(&mut mem);
             assert_eq!(cpu.pc, param.1);
             assert_eq!(cycle, param.2);
+        }
+    }
+
+    # [test]
+    fn execute_lax_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x00, 0x01, false, false),
+            (0x01, 0x00, true, false),
+            (0x00, 0x80, false, true),
+        ] {
+            cpu.a  = param.0;
+            cpu.x  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xa7u8);
+            mem.write_u8(0x0001, 0x02u8);
+            mem.write_u8(0x0002, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.1);
+            assert_eq!(cpu.x, param.1);
+            assert_eq!(cpu.read_zero_flag(), param.2);
+            assert_eq!(cpu.read_negative_flag(), param.3);
+            assert_eq!(cycle, 0x03u8);
         }
     }
 
