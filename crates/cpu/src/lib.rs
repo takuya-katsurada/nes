@@ -475,6 +475,13 @@ impl Cpu {
                 self.x = result;
                 1 + operand.cycle
             }
+            Opcode::SAX => {
+                let operand = self.fetch(system, mode);
+                let result = self.a & self.x;
+
+                system.write_u8(operand.address, result);
+                1 + operand.cycle
+            }
             Opcode::SKB => {
                 let operand = self.fetch(system, mode);
                 1 + operand.cycle
@@ -1414,6 +1421,26 @@ mod tests {
         assert_eq!(cpu.pc, 0x1235);
         assert_eq!(cycle, 6);
     }
+
+
+    # [test]
+    fn execute_sax_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.a  = 0xffu8;
+        cpu.x  = 0x01u8;
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x87u8);
+        mem.write_u8(0x0001, 0x02u8);
+        mem.write_u8(0x0002, 0xffu8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(mem.read_u8(0x02), 0x01);
+        assert_eq!(cycle, 3);
+    }
+
 
     # [test]
     fn execute_sbc_instruction()
