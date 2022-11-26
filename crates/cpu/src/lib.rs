@@ -380,6 +380,12 @@ impl Cpu {
                     3 + operand.cycle
                 }
             }
+            Opcode::RTS => {
+                let lo = self.stack_pop(system);
+                let hi = self.stack_pop(system);
+                self.pc = u16::from(lo) | (u16::from(hi) << 8) + 1;
+                6
+            }
             Opcode::SBC => {
                 let operand = self.fetch(system, mode);
                 let (v, c1) = self.a.overflowing_sub(operand.data);
@@ -1390,6 +1396,23 @@ mod tests {
             assert_eq!(cpu.read_negative_flag(), param.5);
             assert_eq!(cycle, 0x05u8);
         }
+    }
+
+    # [test]
+    fn execute_rts_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.sp = 0x00fdu16;
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x60u8);
+        mem.write_u8(0x00ff, 0x12u8);
+        mem.write_u8(0x00fe, 0x34u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.pc, 0x1235);
+        assert_eq!(cycle, 6);
     }
 
     # [test]
