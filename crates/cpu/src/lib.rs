@@ -23,6 +23,11 @@ pub struct Cpu {
     pub sp: u16,
 }
 
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+pub enum Interrupt {
+    BRK
+}
+
 impl Default for Cpu {
     fn default() -> Self {
         Self {
@@ -37,6 +42,34 @@ impl Default for Cpu {
 }
 
 impl Cpu {
+    pub fn interrupt(&mut self, system: &mut dyn memory::system::SystemBus, request_type: Interrupt) {
+        if self.read_interrupt_flag() && (request_type == Interrupt::BRK) {
+            return
+        }
+
+        let address = match request_type {
+            Interrupt::BRK => {
+                self.write_break_flag(true);
+                self.pc = self.pc + 1;
+
+                let lo = (self.pc >> 8) as u8;
+                let hi = (self.pc & 0xff) as u8;
+
+                self.stack_push(system, lo);
+                self.stack_push(system, hi);
+                self.stack_push(system, self.p);
+                self.write_interrupt_flag(true);
+
+                (0xfffeu16, 0xffffu16)
+            }
+        };
+
+        let lo = system.read_u8(address.0);
+        let hi = system.read_u8(address.1);
+
+        self.pc = u16::from(lo) | (u16::from(hi) << 8);
+    }
+
     pub fn step(&mut self, system: &mut dyn memory::system::SystemBus) -> u8 {
         let raw_opcode = self.fetch_u8(system);
         let instruction = Instruction::from(raw_opcode);
@@ -133,6 +166,10 @@ impl Cpu {
                 } else {
                     1 + operand.cycle
                 }
+            }
+            Opcode::BRK => {
+                self.interrupt(system, Interrupt::BRK);
+                7
             }
             Opcode::BVC => {
                 let operand = self.fetch(system, mode);
@@ -681,6 +718,28 @@ mod tests {
     }
 
     # [test]
+    fn execute_brk_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.p  = 0x82u8;
+        cpu.sp = 0x00ffu16;
+        cpu.pc = 0x0080u16;
+        mem.write_u8(0x0080, 0x00u8);
+        mem.write_u8(0xfffe, 0x34u8);
+        mem.write_u8(0xffff, 0x12u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.pc, 0x1234);
+        assert_eq!(mem.read_u8(0x00ff), 0x00);
+        assert_eq!(mem.read_u8(0x00fe), 0x82);
+        assert_eq!(mem.read_u8(0x00fd), 0x92);
+        assert_eq!(cpu.read_interrupt_flag(), true);
+        assert_eq!(cycle, 7);
+    }
+
+        # [test]
     fn execute_bvc_instruction()
     {
         let mut cpu = super::Cpu::default();
