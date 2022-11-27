@@ -380,6 +380,14 @@ impl Cpu {
                     3 + operand.cycle
                 }
             }
+            Opcode::RTI => {
+                let status = self.stack_pop(system);
+                let lo = self.stack_pop(system);
+                let hi = self.stack_pop(system);
+                self.p = status;
+                self.pc = u16::from(lo) | (u16::from(hi) << 8);
+                6
+            }
             Opcode::RTS => {
                 let lo = self.stack_pop(system);
                 let hi = self.stack_pop(system);
@@ -1403,6 +1411,27 @@ mod tests {
             assert_eq!(cpu.read_negative_flag(), param.5);
             assert_eq!(cycle, 0x05u8);
         }
+    }
+
+    # [test]
+    fn execute_rti_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.p  = 0x00u8;
+        cpu.sp = 0x00fcu16;
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x40u8);
+        mem.write_u8(0x00ff, 0x12u8);
+        mem.write_u8(0x00fe, 0x34u8);
+        mem.write_u8(0x00fd, 0x82u8);
+
+        let cycle = cpu.step(&mut mem);
+
+        assert_eq!(cpu.p, 0x82u8);
+        assert_eq!(cpu.pc, 0x1234);
+        assert_eq!(cycle, 6);
     }
 
     # [test]
