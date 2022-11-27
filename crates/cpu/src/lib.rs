@@ -71,6 +71,7 @@ impl Cpu {
     }
 
     pub fn step(&mut self, system: &mut dyn memory::system::SystemBus) -> u8 {
+        let current_pc = self.pc;
         let raw_opcode = self.fetch_u8(system);
         let instruction = Instruction::from(raw_opcode);
 
@@ -276,6 +277,15 @@ impl Cpu {
                 let operand = self.fetch(system, mode);
                 self.pc = operand.address;
                 operand.cycle
+            }
+            Opcode::JSR => {
+                let operand = self.fetch(system, mode);
+
+                let address = current_pc + 2;
+                self.stack_push(system, (address >> 8) as u8);
+                self.stack_push(system, (address & 0xff) as u8);
+                self.pc = operand.address;
+                6
             }
             Opcode::LDA => {
                 let operand = self.fetch(system, mode);
@@ -1093,6 +1103,26 @@ mod tests {
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.pc, 0x1234);
         assert_eq!(cycle, 0x03u8);
+    }
+
+    # [test]
+    fn execute_jsr_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.sp = 0x00ffu16;
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x20u8);
+        mem.write_u8(0x0001, 0x34u8);
+        mem.write_u8(0x0002, 0x12u8);
+        mem.write_u8(0x1234, 0xffu8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.pc, 0x1234);
+        assert_eq!(mem.read_u8(0xff), 0x00);
+        assert_eq!(mem.read_u8(0xfe), 0x02);
+        assert_eq!(cycle, 0x06u8);
     }
 
     # [test]
