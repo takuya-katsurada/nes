@@ -480,6 +480,17 @@ impl Cpu {
                 2
             }
 
+            Opcode::DCP => {
+                let operand = self.fetch(system, mode);
+
+                let v = operand.data.wrapping_sub(1);
+                let result = self.a.wrapping_sub(v);
+
+                self.write_carry_flag(self.a >= v);
+                self.check_zero_and_negative_flag(result);
+                system.write_u8(operand.address, v);
+                3 + operand.cycle
+            }
             Opcode::IGN => {
                 let operand = self.fetch(system, mode);
                 1 + operand.cycle
@@ -923,6 +934,31 @@ mod tests {
             assert_eq!(cycle, 0x02u8);
         }
     }
+
+    # [test]
+    fn execute_dcp_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x01, 0x08, 0x07, false, false, true),
+            (0x00, 0x01, 0x00, true, true, false),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xc7u8);
+            mem.write_u8(0x0001, 0x02u8);
+            mem.write_u8(0x0002, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(mem.read_u8(0x0002), param.2);
+            assert_eq!(cpu.read_carry_flag(), param.3);
+            assert_eq!(cpu.read_zero_flag(), param.4);
+            assert_eq!(cpu.read_negative_flag(), param.5);
+        }
+    }
+
 
     # [test]
     fn execute_dec_instruction()
