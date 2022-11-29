@@ -487,6 +487,17 @@ impl Cpu {
                 2
             }
 
+            Opcode::ALR => {
+                let operand = self.fetch(system, mode);
+
+                let v = self.a & operand.data;
+                let result = v.wrapping_shr(1);
+
+                self.write_carry_flag((v & 0x01) == 0x01);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                1 + operand.cycle
+            }
             Opcode::DCP => {
                 let operand = self.fetch(system, mode);
 
@@ -562,6 +573,30 @@ mod tests {
             assert_eq!(cpu.read_carry_flag(), param.4);
             assert_eq!(cpu.read_zero_flag(), param.5);
             assert_eq!(cpu.read_negative_flag(), param.6);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_alr_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0xff, 0x02, 0x01, false, false, false),
+            (0xff, 0x01, 0x00, true, true, false),
+        ]{
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x4b);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.2);
+            assert_eq!(cpu.read_carry_flag(), param.3);
+            assert_eq!(cpu.read_zero_flag(), param.4);
+            assert_eq!(cpu.read_negative_flag(), param.5);
             assert_eq!(cycle, 0x02u8);
         }
     }
