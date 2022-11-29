@@ -141,6 +141,13 @@ impl Cpu {
                     1 + operand.cycle
                 }
             }
+            Opcode::BIT => {
+                let operand = self.fetch(system, mode);
+                let v = operand.data;
+                self.write_overflow_flag((v & 0x40) == 0x40);
+                self.check_zero_and_negative_flag(v);
+                1 + operand.cycle
+            }
             Opcode::BMI => {
                 let operand = self.fetch(system, mode);
                 if self.read_negative_flag() {
@@ -690,6 +697,31 @@ mod tests {
             let cycle = cpu.step(&mut mem);
             assert_eq!(cpu.pc, param.1);
             assert_eq!(cycle, param.2);
+        }
+    }
+
+    # [test]
+    fn execute_bit_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x01, false, false, false),
+            (0x40, true, false, false),
+            (0x00, false, true, false),
+            (0x80, false, false, true),
+        ] {
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x24u8);
+            mem.write_u8(0x0001, 0x02u8);
+            mem.write_u8(0x0002, param.0);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.read_overflow_flag(), param.1);
+            assert_eq!(cpu.read_zero_flag(), param.2);
+            assert_eq!(cpu.read_negative_flag(), param.3);
+            assert_eq!(cycle, 0x03u8);
         }
     }
 
