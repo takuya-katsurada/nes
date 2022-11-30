@@ -25,7 +25,8 @@ pub struct Cpu {
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Interrupt {
-    BRK
+    BRK,
+    RESET,
 }
 
 impl Default for Cpu {
@@ -61,6 +62,10 @@ impl Cpu {
                 self.write_interrupt_flag(true);
 
                 (0xfffeu16, 0xffffu16)
+            },
+            Interrupt::RESET => {
+                self.write_interrupt_flag(true);
+                (0xfffcu16, 0xfffdu16)
             }
         };
 
