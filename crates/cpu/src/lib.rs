@@ -26,6 +26,7 @@ pub struct Cpu {
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Interrupt {
     BRK,
+    IRQ,
     RESET,
 }
 
@@ -52,6 +53,19 @@ impl Cpu {
             Interrupt::BRK => {
                 self.write_break_flag(true);
                 self.pc = self.pc + 1;
+
+                let lo = (self.pc >> 8) as u8;
+                let hi = (self.pc & 0xff) as u8;
+
+                self.stack_push(system, lo);
+                self.stack_push(system, hi);
+                self.stack_push(system, self.p);
+                self.write_interrupt_flag(true);
+
+                (0xfffeu16, 0xffffu16)
+            },
+            Interrupt::IRQ => {
+                self.write_break_flag(false);
 
                 let lo = (self.pc >> 8) as u8;
                 let hi = (self.pc & 0xff) as u8;
