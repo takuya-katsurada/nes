@@ -45,7 +45,8 @@ impl Default for Cpu {
 
 impl Cpu {
     pub fn interrupt(&mut self, system: &mut dyn memory::system::SystemBus, request_type: Interrupt) {
-        if self.read_interrupt_flag() && (request_type == Interrupt::BRK) {
+        let is_multilevel_interrupt = self.read_interrupt_flag();
+        if is_multilevel_interrupt && (request_type == Interrupt::IRQ || request_type == Interrupt::BRK) {
             return
         }
 
