@@ -27,6 +27,7 @@ pub struct Cpu {
 pub enum Interrupt {
     BRK,
     IRQ,
+    NMI,
     RESET,
 }
 
@@ -78,6 +79,19 @@ impl Cpu {
 
                 (0xfffeu16, 0xffffu16)
             },
+            Interrupt::NMI => {
+                self.write_break_flag(false);
+
+                let lo = (self.pc >> 8) as u8;
+                let hi = (self.pc & 0xff) as u8;
+
+                self.stack_push(system, lo);
+                self.stack_push(system, hi);
+                self.stack_push(system, self.p);
+                self.write_interrupt_flag(true);
+
+                (0xfffau16, 0xfffbu16)
+            }
             Interrupt::RESET => {
                 self.write_interrupt_flag(true);
                 (0xfffcu16, 0xfffdu16)
