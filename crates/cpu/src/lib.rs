@@ -532,6 +532,16 @@ impl Cpu {
                 self.a = result;
                 1 + operand.cycle
             }
+            Opcode::ANC => {
+                let operand = self.fetch(system, mode);
+
+                let result = self.a & operand.data;
+
+                self.write_carry_flag((result & 0x80) == 0x80);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                1 + operand.cycle
+            }
             Opcode::DCP => {
                 let operand = self.fetch(system, mode);
 
@@ -624,6 +634,31 @@ mod tests {
             cpu.a  = param.0;
             cpu.pc = 0x0000u16;
             mem.write_u8(0x0000, 0x4b);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.2);
+            assert_eq!(cpu.read_carry_flag(), param.3);
+            assert_eq!(cpu.read_zero_flag(), param.4);
+            assert_eq!(cpu.read_negative_flag(), param.5);
+            assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_anc_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0xff, 0x01, 0x01, false, false, false),
+            (0xff, 0x00, 0x00, false, true, false),
+            (0xff, 0x80, 0x80, true, false, true),
+        ]{
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x0b);
             mem.write_u8(0x0001, param.1);
 
             let cycle = cpu.step(&mut mem);
