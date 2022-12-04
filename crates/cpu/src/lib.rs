@@ -565,6 +565,17 @@ impl Cpu {
                 self.a = result;
                 1 + operand.cycle
             }
+            Opcode::AXS => {
+                let operand = self.fetch(system, mode);
+
+                let v = self.a & operand.data;
+                let (result, is_carry) = self.a.overflowing_sub(v);
+
+                self.write_carry_flag(is_carry);
+                self.check_zero_and_negative_flag(result);
+                self.x = result;
+                1 + operand.cycle
+            }
             Opcode::DCP => {
                 let operand = self.fetch(system, mode);
 
@@ -786,6 +797,29 @@ mod tests {
             assert_eq!(cpu.read_zero_flag(), param.3);
             assert_eq!(cpu.read_negative_flag(), param.4);
             assert_eq!(cycle, 0x05u8);
+        }
+    }
+
+    # [test]
+    fn execute_axs_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x03, 0x01, 0x02, false, false),
+            (0xff, 0x01, 0xfe, false, true),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xcbu8);
+            mem.write_u8(0x0001, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.x, param.2);
+            assert_eq!(cpu.read_zero_flag(), param.3);
+            assert_eq!(cpu.read_negative_flag(), param.4);
+            assert_eq!(cycle, 0x02u8);
         }
     }
 
