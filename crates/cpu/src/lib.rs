@@ -1233,6 +1233,27 @@ mod tests {
     }
 
     # [test]
+    fn execute_ign_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x04, 0x0002, 0x03),
+            (0x14, 0x0002, 0x04),
+            (0x0c, 0x0003, 0x04),
+            (0x1c, 0x0003, 0x04),
+        ] {
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, param.0);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.pc, param.1);
+            assert_eq!(cycle, param.2);
+        }
+    }
+
+    # [test]
     fn execute_inc_instruction()
     {
         let mut cpu = super::Cpu::default();
@@ -1337,6 +1358,33 @@ mod tests {
         assert_eq!(mem.read_u8(0xff), 0x00);
         assert_eq!(mem.read_u8(0xfe), 0x02);
         assert_eq!(cycle, 0x06u8);
+    }
+
+    # [test]
+    fn execute_lax_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x00, 0x01, false, false),
+            (0x01, 0x00, true, false),
+            (0x00, 0x80, false, true),
+        ] {
+            cpu.a  = param.0;
+            cpu.x  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0xa7u8);
+            mem.write_u8(0x0001, 0x02u8);
+            mem.write_u8(0x0002, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.1);
+            assert_eq!(cpu.x, param.1);
+            assert_eq!(cpu.read_zero_flag(), param.2);
+            assert_eq!(cpu.read_negative_flag(), param.3);
+            assert_eq!(cycle, 0x03u8);
+        }
     }
 
     # [test]
@@ -1784,6 +1832,20 @@ mod tests {
     }
 
     # [test]
+    fn execute_skb_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        cpu.pc = 0x0000u16;
+        mem.write_u8(0x0000, 0x80u8);
+
+        let cycle = cpu.step(&mut mem);
+        assert_eq!(cpu.pc, 0x0002u16);
+        assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
     fn execute_sta_instruction()
     {
         let mut cpu = super::Cpu::default();
@@ -1972,67 +2034,5 @@ mod tests {
             assert_eq!(cpu.read_negative_flag(), param.3);
             assert_eq!(cycle, 0x02u8);
         }
-    }
-
-    # [test]
-    fn execute_ign_instruction()
-    {
-        let mut cpu = super::Cpu::default();
-        let mut mem = memory::Memory::default();
-
-        for param in [
-            (0x04, 0x0002, 0x03),
-            (0x14, 0x0002, 0x04),
-            (0x0c, 0x0003, 0x04),
-            (0x1c, 0x0003, 0x04),
-        ] {
-            cpu.pc = 0x0000u16;
-            mem.write_u8(0x0000, param.0);
-
-            let cycle = cpu.step(&mut mem);
-            assert_eq!(cpu.pc, param.1);
-            assert_eq!(cycle, param.2);
-        }
-    }
-
-    # [test]
-    fn execute_lax_instruction()
-    {
-        let mut cpu = super::Cpu::default();
-        let mut mem = memory::Memory::default();
-
-        for param in [
-            (0x00, 0x01, false, false),
-            (0x01, 0x00, true, false),
-            (0x00, 0x80, false, true),
-        ] {
-            cpu.a  = param.0;
-            cpu.x  = param.0;
-            cpu.pc = 0x0000u16;
-            mem.write_u8(0x0000, 0xa7u8);
-            mem.write_u8(0x0001, 0x02u8);
-            mem.write_u8(0x0002, param.1);
-
-            let cycle = cpu.step(&mut mem);
-            assert_eq!(cpu.a, param.1);
-            assert_eq!(cpu.x, param.1);
-            assert_eq!(cpu.read_zero_flag(), param.2);
-            assert_eq!(cpu.read_negative_flag(), param.3);
-            assert_eq!(cycle, 0x03u8);
-        }
-    }
-
-    # [test]
-    fn execute_skb_instruction()
-    {
-        let mut cpu = super::Cpu::default();
-        let mut mem = memory::Memory::default();
-
-        cpu.pc = 0x0000u16;
-        mem.write_u8(0x0000, 0x80u8);
-
-        let cycle = cpu.step(&mut mem);
-        assert_eq!(cpu.pc, 0x0002u16);
-        assert_eq!(cycle, 0x02u8);
     }
 }
