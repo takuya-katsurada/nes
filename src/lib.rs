@@ -20,7 +20,7 @@ pub struct Snapshot {
 
 impl Nes {
     pub fn from(data: &mut Vec<u8>) -> Result<Nes, EmulationError> {
-        if !Rom::isValid(data) {
+        if !Rom::is_valid(data) {
             return Err(EmulationError::InvalidRom);
         }
 

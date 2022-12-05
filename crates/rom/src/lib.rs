@@ -9,7 +9,7 @@ pub struct Rom {
 }
 
 impl Rom {
-    pub fn isValid(data: &mut Vec<u8>) -> bool {
+    pub fn is_valid(data: &mut Vec<u8>) -> bool {
         &data[0..4] == [0x4e,0x45,0x53,0x1a]
     }
 
