@@ -493,6 +493,21 @@ impl Cpu {
                 self.p = result;
                 4
             }
+            Opcode::RLA => {
+                let operand = self.fetch(system, mode);
+
+                let v = operand.data.wrapping_shl(1) | (
+                    if self.read_carry_flag() { 0x01 } else { 0x00 }
+                );
+                let result = self.a & v;
+
+                self.write_carry_flag((operand.data & 0x80) == 0x80);
+                self.check_zero_and_negative_flag(v);
+                self.a = result;
+                system.write_u8(operand.address, v);
+
+                3 + operand.cycle
+            }
             Opcode::ROL => {
                 let operand = self.fetch(system, mode);
                 let result = operand.data.wrapping_shl(1) | (
@@ -1720,6 +1735,33 @@ mod tests {
         assert_eq!(cpu.p, 0x90u8);
         assert_eq!(cpu.sp, 0x00ffu16);
         assert_eq!(cycle, 0x04u8);
+    }
+
+    # [test]
+    fn execute_rla_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0xff, 0x01, 0x02, 0x02, false, false, false, false),
+            (0xff, 0x80, 0x00, 0x00, false, true, true, false)
+        ]{
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            cpu.write_carry_flag(param.4);
+            mem.write_u8(0x0000, 0x27);
+            mem.write_u8(0x0001, 0x02);
+            mem.write_u8(0x0002, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.2);
+            assert_eq!(mem.read_u8(0x02), param.3);
+            assert_eq!(cpu.read_carry_flag(), param.5);
+            assert_eq!(cpu.read_zero_flag(), param.6);
+            assert_eq!(cpu.read_negative_flag(), param.7);
+            assert_eq!(cycle, 0x05u8);
+        }
     }
 
     # [test]
