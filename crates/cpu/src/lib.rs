@@ -384,6 +384,23 @@ impl Cpu {
                 self.y = result;
                 2
             }
+            Opcode::ISC => {
+                let operand = self.fetch(system, mode);
+
+                let v1 = operand.data.wrapping_add(1);
+                let (v2, c1) = self.a.overflowing_sub(v1);
+                let (result, c2) = v2.overflowing_sub(
+                    if self.read_carry_flag(){ 0 } else { 1 }
+                );
+
+                let of = (((self.a ^ v1) & 0x80) == 0x80) && (((self.a ^ result) & 0x80) == 0x80);
+                self.write_carry_flag(c1 || c2);
+                self.write_overflow_flag(of);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                system.write_u8(operand.address, v1);
+                1 + operand.cycle
+            }
             Opcode::JMP => {
                 let operand = self.fetch(system, mode);
                 self.pc = operand.address;
@@ -1292,6 +1309,33 @@ mod tests {
             assert_eq!(cpu.read_zero_flag(), param.3);
             assert_eq!(cpu.read_negative_flag(), param.4);
             assert_eq!(cycle, 0x02u8);
+        }
+    }
+
+    # [test]
+    fn execute_isc_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x04, 0x01, 0x01, false, false, false, false),
+            (0x04, 0x01, 0x02, true, false, false, false),
+            (0x03, 0x01, 0x00, false, false, true, false),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            cpu.write_carry_flag(param.3);
+            mem.write_u8(0x0000, 0xe7);
+            mem.write_u8(0x0001, 0x02);
+            mem.write_u8(0x0002, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.2);
+            assert_eq!(cpu.read_carry_flag(), param.4);
+            assert_eq!(cpu.read_zero_flag(), param.5);
+            assert_eq!(cpu.read_negative_flag(), param.6);
+            assert_eq!(cycle, 0x03u8);
         }
     }
 
