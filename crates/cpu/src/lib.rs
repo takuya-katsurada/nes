@@ -126,10 +126,45 @@ impl Cpu {
                 self.a = result;
                 1 + operand.cycle
             }
+            Opcode::ALR => {
+                let operand = self.fetch(system, mode);
+
+                let v = self.a & operand.data;
+                let result = v.wrapping_shr(1);
+
+                self.write_carry_flag((v & 0x01) == 0x01);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                1 + operand.cycle
+            }
+            Opcode::ANC => {
+                let operand = self.fetch(system, mode);
+
+                let result = self.a & operand.data;
+
+                self.write_carry_flag((result & 0x80) == 0x80);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                1 + operand.cycle
+            }
             Opcode::AND => {
                 let operand = self.fetch(system, mode);
                 let result = self.a & operand.data;
 
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                1 + operand.cycle
+            }
+            Opcode::ARR => {
+                let operand = self.fetch(system, mode);
+
+                let v = self.a & operand.data;
+                let result = v.wrapping_shr(1) | (
+                    if self.read_carry_flag() { 0x80 } else { 0x00 }
+                );
+
+                self.write_carry_flag((result & 0x40) == 0x40);
+                self.write_overflow_flag(((result & 0x40) ^ ((result & 0x20) << 1)) == 0x40);
                 self.check_zero_and_negative_flag(result);
                 self.a = result;
                 1 + operand.cycle
@@ -147,6 +182,17 @@ impl Cpu {
                     system.write_u8(operand.address, result);
                     3 + operand.cycle
                 }
+            }
+            Opcode::AXS => {
+                let operand = self.fetch(system, mode);
+
+                let v = self.a & operand.data;
+                let (result, is_carry) = self.a.overflowing_sub(v);
+
+                self.write_carry_flag(is_carry);
+                self.check_zero_and_negative_flag(result);
+                self.x = result;
+                1 + operand.cycle
             }
             Opcode::BCC => {
                 let operand = self.fetch(system, mode);
@@ -271,6 +317,17 @@ impl Cpu {
                 self.check_zero_and_negative_flag(result);
                 1 + operand.cycle
             }
+            Opcode::DCP => {
+                let operand = self.fetch(system, mode);
+
+                let v = operand.data.wrapping_sub(1);
+                let result = self.a.wrapping_sub(v);
+
+                self.write_carry_flag(self.a >= v);
+                self.check_zero_and_negative_flag(result);
+                system.write_u8(operand.address, v);
+                3 + operand.cycle
+            }
             Opcode::DEC => {
                 let operand = self.fetch(system, mode);
                 let result = operand.data.wrapping_sub(1);
@@ -299,6 +356,10 @@ impl Cpu {
 
                 self.check_zero_and_negative_flag(result);
                 self.a = result;
+                1 + operand.cycle
+            }
+            Opcode::IGN => {
+                let operand = self.fetch(system, mode);
                 1 + operand.cycle
             }
             Opcode::INC => {
@@ -336,6 +397,15 @@ impl Cpu {
                 self.stack_push(system, (address & 0xff) as u8);
                 self.pc = operand.address;
                 6
+            }
+            Opcode::LAX => {
+                let operand = self.fetch(system, mode);
+                let result = operand.data;
+
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                self.x = result;
+                1 + operand.cycle
             }
             Opcode::LDA => {
                 let operand = self.fetch(system, mode);
@@ -454,6 +524,13 @@ impl Cpu {
                 self.pc = u16::from(lo) | (u16::from(hi) << 8) + 1;
                 6
             }
+            Opcode::SAX => {
+                let operand = self.fetch(system, mode);
+                let result = self.a & self.x;
+
+                system.write_u8(operand.address, result);
+                1 + operand.cycle
+            }
             Opcode::SBC => {
                 let operand = self.fetch(system, mode);
                 let (v, c1) = self.a.overflowing_sub(operand.data);
@@ -479,6 +556,10 @@ impl Cpu {
             Opcode::SEI => {
                 self.write_interrupt_flag(true);
                 2
+            }
+            Opcode::SKB => {
+                let operand = self.fetch(system, mode);
+                1 + operand.cycle
             }
             Opcode::STA => {
                 let operand = self.fetch(system, mode);
@@ -529,89 +610,6 @@ impl Cpu {
                 self.a = self.y;
                 2
             }
-
-            Opcode::ALR => {
-                let operand = self.fetch(system, mode);
-
-                let v = self.a & operand.data;
-                let result = v.wrapping_shr(1);
-
-                self.write_carry_flag((v & 0x01) == 0x01);
-                self.check_zero_and_negative_flag(result);
-                self.a = result;
-                1 + operand.cycle
-            }
-            Opcode::ANC => {
-                let operand = self.fetch(system, mode);
-
-                let result = self.a & operand.data;
-
-                self.write_carry_flag((result & 0x80) == 0x80);
-                self.check_zero_and_negative_flag(result);
-                self.a = result;
-                1 + operand.cycle
-            }
-            Opcode::ARR => {
-                let operand = self.fetch(system, mode);
-
-                let v = self.a & operand.data;
-                let result = v.wrapping_shr(1) | (
-                    if self.read_carry_flag() { 0x80 } else { 0x00 }
-                );
-
-                self.write_carry_flag((result & 0x40) == 0x40);
-                self.write_overflow_flag(((result & 0x40) ^ ((result & 0x20) << 1)) == 0x40);
-                self.check_zero_and_negative_flag(result);
-                self.a = result;
-                1 + operand.cycle
-            }
-            Opcode::AXS => {
-                let operand = self.fetch(system, mode);
-
-                let v = self.a & operand.data;
-                let (result, is_carry) = self.a.overflowing_sub(v);
-
-                self.write_carry_flag(is_carry);
-                self.check_zero_and_negative_flag(result);
-                self.x = result;
-                1 + operand.cycle
-            }
-            Opcode::DCP => {
-                let operand = self.fetch(system, mode);
-
-                let v = operand.data.wrapping_sub(1);
-                let result = self.a.wrapping_sub(v);
-
-                self.write_carry_flag(self.a >= v);
-                self.check_zero_and_negative_flag(result);
-                system.write_u8(operand.address, v);
-                3 + operand.cycle
-            }
-            Opcode::IGN => {
-                let operand = self.fetch(system, mode);
-                1 + operand.cycle
-            }
-            Opcode::LAX => {
-                let operand = self.fetch(system, mode);
-                let result = operand.data;
-
-                self.check_zero_and_negative_flag(result);
-                self.a = result;
-                self.x = result;
-                1 + operand.cycle
-            }
-            Opcode::SAX => {
-                let operand = self.fetch(system, mode);
-                let result = self.a & self.x;
-
-                system.write_u8(operand.address, result);
-                1 + operand.cycle
-            }
-            Opcode::SKB => {
-                let operand = self.fetch(system, mode);
-                1 + operand.cycle
-            }
-
             _ => panic!("invalid opcode has been specified")
         }
     }
