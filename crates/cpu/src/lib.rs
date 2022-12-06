@@ -615,6 +615,18 @@ impl Cpu {
                 let operand = self.fetch(system, mode);
                 1 + operand.cycle
             }
+            Opcode::SLO => {
+                let operand = self.fetch(system, mode);
+
+                let v = operand.data.wrapping_shl(1);
+                let result = self.a | v;
+
+                self.write_carry_flag((operand.data & 0x80) == 0x80);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                system.write_u8(operand.address, v);
+                3 + operand.cycle
+            }
             Opcode::STA => {
                 let operand = self.fetch(system, mode);
 
@@ -2041,6 +2053,32 @@ mod tests {
         let cycle = cpu.step(&mut mem);
         assert_eq!(cpu.pc, 0x0002u16);
         assert_eq!(cycle, 0x02u8);
+    }
+
+    # [test]
+    fn execute_slo_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x10, 0x01, 0x12, 0x02, false, false, false),
+            (0x01, 0x40, 0x81, 0x80, false, false, true),
+        ] {
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            mem.write_u8(0x0000, 0x07u8);
+            mem.write_u8(0x0001, 0x0002);
+            mem.write_u8(0x0002, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.2);
+            assert_eq!(mem.read_u8(0x02), param.3);
+            assert_eq!(cpu.read_carry_flag(), param.4);
+            assert_eq!(cpu.read_zero_flag(), param.5);
+            assert_eq!(cpu.read_negative_flag(), param.6);
+            assert_eq!(cycle, 0x05u8);
+        }
     }
 
     # [test]
