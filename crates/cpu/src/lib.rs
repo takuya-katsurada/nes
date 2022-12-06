@@ -542,6 +542,28 @@ impl Cpu {
                     3 + operand.cycle
                 }
             }
+            Opcode::RRA => {
+                let operand = self.fetch(system, mode);
+
+                let v1 = operand.data.wrapping_shr(1) | (
+                    if self.read_carry_flag() { 0x80 } else { 0x00 }
+                );
+                self.write_carry_flag((v1 & 0x01) == 0x01);
+
+                let v2 = u16::from(self.a) + u16::from(v1) + (
+                    if self.read_carry_flag() { 1 } else { 0 }
+                );
+                let result = (v2 & 0xff) as u8;
+
+                let of = ((self.a ^ result) & (v1 ^ result) & 0x80u8) == 0x80u8;
+                self.write_carry_flag(v2 > 0x00ffu16);
+                self.write_overflow_flag(of);
+                self.check_zero_and_negative_flag(result);
+                self.a = result;
+                system.write_u8(operand.address, v1);
+
+                3 + operand.cycle
+            }
             Opcode::RTI => {
                 let status = self.stack_pop(system);
                 let lo = self.stack_pop(system);
@@ -1850,6 +1872,33 @@ mod tests {
             assert_eq!(cpu.read_carry_flag(), param.3);
             assert_eq!(cpu.read_zero_flag(), param.4);
             assert_eq!(cpu.read_negative_flag(), param.5);
+            assert_eq!(cycle, 0x05u8);
+        }
+    }
+
+    # [test]
+    fn execute_rra_instruction()
+    {
+        let mut cpu = super::Cpu::default();
+        let mut mem = memory::Memory::default();
+
+        for param in [
+            (0x80, 0x02, 0x82, 0x01, false, false, false, true),
+            (0x40, 0x04, 0x42, 0x02, false, false, false, false),
+        ]{
+            cpu.a  = param.0;
+            cpu.pc = 0x0000u16;
+            cpu.write_carry_flag(param.4);
+            mem.write_u8(0x0000, 0x67);
+            mem.write_u8(0x0001, 0x02);
+            mem.write_u8(0x0002, param.1);
+
+            let cycle = cpu.step(&mut mem);
+            assert_eq!(cpu.a, param.2);
+            assert_eq!(mem.read_u8(0x02), param.3);
+            assert_eq!(cpu.read_carry_flag(), param.5);
+            assert_eq!(cpu.read_zero_flag(), param.6);
+            assert_eq!(cpu.read_negative_flag(), param.7);
             assert_eq!(cycle, 0x05u8);
         }
     }
