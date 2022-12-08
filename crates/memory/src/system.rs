@@ -1,4 +1,4 @@
-use crate::Memory;
+use crate::{Memory, PPU_REGISTER_BASE_ADDRESS};
 
 pub trait SystemBus {
     fn read_u8(&self, address: u16) -> u8;
@@ -7,11 +7,25 @@ pub trait SystemBus {
 
 impl SystemBus for Memory {
     fn read_u8(&self, address: u16) -> u8 {
+        if address < PPU_REGISTER_BASE_ADDRESS {
+            let index = usize::from(address) % self.ram.len();
+            return self.ram[index];
+        }
+
+        // TODO: Read from the contents of Rom.
+        //       BRK test fails if 0 is set as a fixed value
         let index = usize::from(address) % self.ram.len();
         return self.ram[index];
     }
 
     fn write_u8(&mut self, address: u16, data: u8) {
+        if address < PPU_REGISTER_BASE_ADDRESS {
+            let index = usize::from(address) % self.ram.len();
+            self.ram[index] = data;
+        }
+
+        // TODO: Write to the contents of Rom.
+        //       If left unimplemented, the BRK test will fail.
         let index = usize::from(address) % self.ram.len();
         self.ram[index] = data;
     }
