@@ -12,5 +12,6 @@ members = [
 
 [dependencies]
 cpu = { path = "crates/cpu" }
+ppu = { path = "crates/ppu" }
 memory = { path = "crates/memory" }
 rom = { path = "crates/rom" }
