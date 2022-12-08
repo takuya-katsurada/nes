@@ -1,3 +1,5 @@
+mod register;
+
 /// CPU cycles per line.
 pub const CPU_CYCLES_PER_LINE: usize = 341 / 3;
 
@@ -13,7 +15,7 @@ pub const OAM_SIZE: usize = 0x0100;
 
 #[derive(Clone)]
 pub struct Ppu {
-    oam: [u8; OAM_SIZE]
+    oam: [u8; OAM_SIZE],
 }
 
 impl Default for Ppu {

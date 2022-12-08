@@ -1,4 +1,5 @@
 pub mod system;
+pub mod video;
 
 pub const CPU_RAM_SIZE: usize = 0x0800;
 pub const PPU_REGISTER_SIZE: usize = 0x0008;

@@ -5,3 +5,4 @@ edition = "2021"
 
 [dependencies]
 cpu = { path = "../cpu" }
+memory = { path = "../memory" }
