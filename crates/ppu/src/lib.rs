@@ -27,12 +27,58 @@ impl Default for Ppu {
 }
 
 impl Ppu {
-    pub fn step(&mut self) -> Option<cpu::Interrupt> {
+    pub fn step(
+        &mut self,
+        registers: &mut dyn memory::system_ppu_registers::PpuRegistersController
+    ) -> Option<cpu::Interrupt> {
+
+        {
+            let address = registers.read_oam_address();
+            let (data, reading_requested, writing_requested) = registers.read_oam_data();
+            if writing_requested {
+                self.oam[usize::from(address)] = data;
+            }
+            if reading_requested {
+                let data = self.oam[usize::from(address)];
+                registers.write_oam_data(data);
+            }
+        }
+
         None
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use memory::system::SystemBus;
+    use memory::system_ppu_registers::PpuRegistersController;
+
+
+    # [test]
+    fn execute_step_to_read_and_write_oam()
+    {
+        {
+            let mut ppu = super::Ppu::default();
+            let mut mem = memory::Memory::default();
+
+            mem.ppu_registers[0x03] = 0xff;
+            mem.write_u8(0x2004, 0x80);
+            ppu.step(&mut mem);
+
+            assert_eq!(ppu.oam[0xff], 0x80);
+        }
+
+        {
+            let mut ppu = super::Ppu::default();
+            let mut mem = memory::Memory::default();
+
+            ppu.oam[0xff] = 0x0f;
+            mem.ppu_registers[0x03] = 0xff;
+            mem.ppu_registers[0x04] = 0x80;
+            mem.read_u8(0x2004);
+            ppu.step(&mut mem);
+
+            assert_eq!(mem.ppu_registers[0x04], 0x0f);
+        }
+    }
 }

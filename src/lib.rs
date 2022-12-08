@@ -39,7 +39,7 @@ impl Nes {
         let mut total_cycle: usize = 0;
         while total_cycle < ppu::CPU_CYCLES_PER_DRAW_FRAME {
             let cpu_cycle = usize::from(self.cpu.step(&mut self.mem));
-            if let Some(interrupt) = self.ppu.step() {
+            if let Some(interrupt) = self.ppu.step(&mut self.mem) {
                 self.cpu.interrupt(&mut self.mem, interrupt);
             }
 

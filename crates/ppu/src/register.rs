@@ -3,16 +3,16 @@ use crate::Ppu;
 impl Ppu {
 
     #[inline(always)]
-    pub(crate) fn read_oam_address(&mut self, video: &mut dyn memory::system_ppu_registers::PpuRegistersController) -> u8 {
-        video.read_oam_address()
+    pub(crate) fn read_oam_address(&mut self, control: &mut dyn memory::system_ppu_registers::PpuRegistersController) -> u8 {
+        control.read_oam_address()
     }
 
     #[inline(always)]
-    pub(crate) fn read_oam_data(&mut self, video: &mut dyn memory::system_ppu_registers::PpuRegistersController) -> (u8, bool, bool) {
-        video.read_oam_data()
+    pub(crate) fn read_oam_data(&mut self, control: &mut dyn memory::system_ppu_registers::PpuRegistersController) -> (u8, bool, bool) {
+        control.read_oam_data()
     }
     #[inline(always)]
-    pub(crate) fn write_oam_data(&mut self, video: &mut dyn memory::system_ppu_registers::PpuRegistersController, data: u8) {
-        video.write_oam_data(data)
+    pub(crate) fn write_oam_data(&mut self, control: &mut dyn memory::system_ppu_registers::PpuRegistersController, data: u8) {
+        control.write_oam_data(data)
     }
 }
