@@ -1,6 +1,6 @@
 use crate::Memory;
 
-pub trait VideoBus {
+pub trait PpuRegistersController {
     // 0x2003: OAM ADDR (Object Attribute Memory).
     fn read_oam_address(&mut self) -> u8;
     // 0x2004: OAM DATA (Object Attribute Memory).
@@ -8,7 +8,7 @@ pub trait VideoBus {
     fn write_oam_data(&mut self, data: u8);
 }
 
-impl VideoBus for Memory {
+impl PpuRegistersController for Memory {
 
     fn read_oam_address(&mut self) -> u8 {
         self.ppu_registers[0x03]
