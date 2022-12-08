@@ -32,6 +32,15 @@ impl Nes {
         return Ok(nes);
     }
 
+    pub fn step(&mut self) {
+        let mut total_cycle: usize = 0;
+        while total_cycle < ppu::CPU_CYCLES_PER_DRAW_FRAME {
+            let cpu_cycle = usize::from(self.cpu.step(&mut self.mem));
+
+            total_cycle += cpu_cycle;
+        }
+    }
+
     pub fn snapshot(self) -> Snapshot {
         Snapshot {
             prg_rom_bytes: self.rom.prg_rom_bytes,
