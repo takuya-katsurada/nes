@@ -1,11 +1,18 @@
 use crate::Memory;
 
 pub trait VideoBus {
+    // 0x2003: OAM ADDR (Object Attribute Memory).
+    fn read_oam_address(&mut self) -> u8;
+    // 0x2004: OAM DATA (Object Attribute Memory).
     fn read_oam_data(&mut self) -> (u8, bool, bool);
     fn write_oam_data(&mut self, data: u8);
 }
 
 impl VideoBus for Memory {
+
+    fn read_oam_address(&mut self) -> u8 {
+        self.ppu_registers[0x03]
+    }
 
     fn read_oam_data(&mut self) -> (u8, bool, bool) {
         let r = self.request_to_read_oam_data;
