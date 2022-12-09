@@ -45,6 +45,15 @@ impl Default for Cpu {
 }
 
 impl Cpu {
+    pub fn reset(&mut self) {
+        self.a  = 0;
+        self.x  = 0;
+        self.y  = 0;
+        self.p  = 0x34;
+        self.pc = 0;
+        self.sp = 0x01fd;
+    }
+
     pub fn interrupt(&mut self, system: &mut dyn memory::system::SystemBus, request_type: Interrupt) {
         let is_multilevel_interrupt = self.read_interrupt_flag();
         if is_multilevel_interrupt && (request_type == Interrupt::IRQ || request_type == Interrupt::BRK) {
@@ -702,6 +711,27 @@ impl Cpu {
 #[cfg(test)]
 mod tests {
     use memory::system::SystemBus;
+
+    # [test]
+    fn reset()
+    {
+        let mut cpu = super::Cpu::default();
+        cpu.reset();
+
+        assert_eq!(cpu.a, 0);
+        assert_eq!(cpu.x, 0);
+        assert_eq!(cpu.y, 0);
+        assert_eq!(cpu.pc, 0);
+        assert_eq!(cpu.sp, 0x01fd);
+        assert_eq!(cpu.read_carry_flag(), false);
+        assert_eq!(cpu.read_zero_flag(), false);
+        assert_eq!(cpu.read_interrupt_flag(), true);
+        assert_eq!(cpu.read_decimal_flag(), false);
+        assert_eq!(cpu.read_break_flag(), true);
+        assert_eq!(cpu.read_reserved_flag(), true);
+        assert_eq!(cpu.read_overflow_flag(), false);
+        assert_eq!(cpu.read_negative_flag(), false);
+    }
 
     # [test]
     fn execute_adc_instruction()
