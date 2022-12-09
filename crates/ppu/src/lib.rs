@@ -27,6 +27,10 @@ impl Default for Ppu {
 }
 
 impl Ppu {
+    pub fn reset(&mut self) {
+        self.oam = [0; OAM_SIZE];
+    }
+
     pub fn step(
         &mut self,
         registers: &mut dyn memory::system_ppu_registers::PpuRegistersController
@@ -52,7 +56,16 @@ impl Ppu {
 mod tests {
     use memory::system::SystemBus;
     use memory::system_ppu_registers::PpuRegistersController;
+    use crate::OAM_SIZE;
 
+    # [test]
+    fn reset()
+    {
+        let mut ppu = super::Ppu::default();
+        ppu.reset();
+
+        assert_eq!(ppu.oam, [0; OAM_SIZE]);
+    }
 
     # [test]
     fn execute_step_to_read_and_write_oam()
