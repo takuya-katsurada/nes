@@ -13,8 +13,12 @@ pub struct Memory {
     pub ram: [u8; CPU_RAM_SIZE],
     pub ppu_registers: [u8; PPU_REGISTER_SIZE],
 
-    pub request_to_read_oam_data: bool,
-    pub request_to_write_oam_data: bool,
+    request_to_read_oam_data: bool,
+    request_to_write_oam_data: bool,
+    request_to_write_ppu_address: bool,
+
+    is_second_write: bool,
+    ppu_register_address_lower: u8,
 }
 
 impl Default for Memory {
@@ -25,6 +29,10 @@ impl Default for Memory {
 
             request_to_read_oam_data: false,
             request_to_write_oam_data: false,
+            request_to_write_ppu_address: false,
+
+            is_second_write: false,
+            ppu_register_address_lower: 0,
         }
     }
 }
