@@ -6,4 +6,5 @@ edition = "2021"
 [workspace]
 
 [dependencies]
+clap = { version = "4.0.29", features = ["derive"] }
 nes = { path = "../../../nes" }
