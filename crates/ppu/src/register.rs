@@ -15,4 +15,9 @@ impl Ppu {
     pub(crate) fn write_oam_data(&mut self, control: &mut dyn memory::system_ppu_registers::PpuRegistersController, data: u8) {
         control.write_oam_data(data)
     }
+
+    #[inline(always)]
+    pub(crate) fn read_ppu_address(&mut self, control: &mut dyn memory::system_ppu_registers::PpuRegistersController) -> (u16, bool) {
+        control.read_ppu_address()
+    }
 }

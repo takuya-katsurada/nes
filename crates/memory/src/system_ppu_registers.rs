@@ -6,6 +6,8 @@ pub trait PpuRegistersController {
     // 0x2004: OAM DATA (Object Attribute Memory).
     fn read_oam_data(&mut self) -> (u8, bool, bool);
     fn write_oam_data(&mut self, data: u8);
+    // 0x2006: PPU ADDR.
+    fn read_ppu_address(&mut self) -> (u16, bool);
 }
 
 impl PpuRegistersController for Memory {
@@ -34,5 +36,14 @@ impl PpuRegistersController for Memory {
 
     fn write_oam_data(&mut self, data: u8) {
         self.ppu_registers[0x04] = data;
+    }
+
+    fn read_ppu_address(&mut self) -> (u16, bool) {
+        let hi = u16::from(self.ppu_registers[0x06]) << 8;
+        let lo = u16::from(self.ppu_register_address_lower);
+        let is_request = self.request_to_write_ppu_address;
+
+        self.request_to_write_ppu_address = false;
+        (lo|hi, is_request)
     }
 }
