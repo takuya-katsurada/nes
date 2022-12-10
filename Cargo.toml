@@ -7,6 +7,7 @@ edition = "2021"
 members = [
   "crates/cpu",
   "crates/ppu",
+  "crates/apu",
   "crates/memory",
   "crates/pad",
   "crates/rom",
