@@ -19,6 +19,10 @@ impl SystemBus for Memory {
                     self.request_to_read_oam_data = true;
                     self.ppu_registers[index]
                 },
+                0x07 => {
+                    self.request_to_read_ppu_data = true;
+                    self.ppu_registers[index]
+                }
                 _ =>  todo!("{}", index),
             };
             return value;
@@ -53,6 +57,10 @@ impl SystemBus for Memory {
                         self.ppu_registers[index] = data;
                         self.is_second_write = true;
                     }
+                },
+                0x07 => {
+                    self.ppu_registers[index] = data;
+                    self.request_to_write_ppu_data = true;
                 }
                 _ =>  todo!("{}", index),
             };
@@ -96,5 +104,10 @@ mod tests {
         mem.write_u8(0x2006u16, 0x34u8);
         assert_eq!(mem.ppu_registers[0x06], 0x34u8);
         assert_eq!(mem.is_second_write, true);
+
+        mem.write_u8(0x2007u16, 0x56u8);
+        assert_eq!(mem.read_u8(0x2007u16), 0x56u8);
+        assert_eq!(mem.request_to_read_ppu_data, true);
+        assert_eq!(mem.request_to_write_ppu_data, true);
     }
 }
