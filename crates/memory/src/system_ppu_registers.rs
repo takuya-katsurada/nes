@@ -8,6 +8,9 @@ pub trait PpuRegistersController {
     fn write_oam_data(&mut self, data: u8);
     // 0x2006: PPU ADDR.
     fn read_ppu_address(&mut self) -> (u16, bool);
+    // $2007: PPU DATA
+    fn read_ppu_data(&mut self) -> (u8, bool, bool);
+    fn write_ppu_data(&mut self, data: u8);
 }
 
 impl PpuRegistersController for Memory {
@@ -45,5 +48,27 @@ impl PpuRegistersController for Memory {
 
         self.request_to_write_ppu_address = false;
         (lo|hi, is_request)
+    }
+
+    fn read_ppu_data(&mut self) -> (u8, bool, bool) {
+        let r = self.request_to_read_ppu_data;
+        let w = self.request_to_write_ppu_data;
+        let v = self.ppu_registers[0x07];
+
+        match (r,w) {
+            (_, true) => {
+                self.request_to_write_ppu_data = false;
+                (v, false, true)
+            },
+            (true, _) => {
+                self.request_to_read_ppu_data = false;
+                (v, true, false)
+            },
+            _ => (v, false, false)
+        }
+    }
+
+    fn write_ppu_data(&mut self, data: u8) {
+        self.ppu_registers[0x07] = data;
     }
 }
