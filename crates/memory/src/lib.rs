@@ -16,10 +16,12 @@ pub struct Memory {
     request_to_read_oam_data: bool,
     request_to_read_ppu_data: bool,
     request_to_write_oam_data: bool,
+    request_to_write_ppu_scroll: bool,
     request_to_write_ppu_address: bool,
     request_to_write_ppu_data: bool,
 
     is_second_write: bool,
+    ppu_register_scroll_y: u8,
     ppu_register_address_lower: u8,
 }
 
@@ -32,10 +34,12 @@ impl Default for Memory {
             request_to_read_oam_data: false,
             request_to_read_ppu_data: false,
             request_to_write_oam_data: false,
+            request_to_write_ppu_scroll: false,
             request_to_write_ppu_address: false,
             request_to_write_ppu_data: false,
 
             is_second_write: false,
+            ppu_register_scroll_y: 0,
             ppu_register_address_lower: 0,
         }
     }
