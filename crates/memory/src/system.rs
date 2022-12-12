@@ -90,7 +90,7 @@ mod tests {
     use crate::system::SystemBus;
 
     # [test]
-    fn test_read_and_write_to_ram() {
+    fn test_read_and_write_to_ram_address() {
         let mut mem = Memory::default();
 
         mem.write_u8(0x0000u16, 0xffu8);
@@ -100,20 +100,36 @@ mod tests {
         mem.write_u8(0x0801u16, 0x0fu8);
         assert_eq!(mem.read_u8(0x0001u16), 0x0fu8);
         assert_eq!(mem.read_u8(0x0801u16), 0x0fu8);
+    }
+
+    # [test]
+    fn test_read_and_write_to_address_0x2004() {
+        let mut mem = Memory::default();
 
         mem.write_u8(0x2004u16, 0xffu8);
         assert_eq!(mem.read_u8(0x2004u16), 0xffu8);
         assert!(mem.request_to_read_oam_data);
         assert!(mem.request_to_write_oam_data);
+    }
+
+    # [test]
+    fn test_read_and_write_to_address_0x2005() {
+        let mut mem = Memory::default();
 
         mem.is_second_write = true;
         mem.write_u8(0x2005u16, 0x12u8);
         assert_eq!(mem.ppu_register_scroll_y, 0x12u8);
         assert_eq!(mem.request_to_write_ppu_scroll, true);
         assert_eq!(mem.is_second_write, false);
+
         mem.write_u8(0x2005u16, 0x34u8);
         assert_eq!(mem.ppu_registers[0x05], 0x34u8);
         assert_eq!(mem.is_second_write, true);
+    }
+
+    # [test]
+    fn test_read_and_write_to_address_0x2006() {
+        let mut mem = Memory::default();
 
         mem.is_second_write = true;
         mem.write_u8(0x2006u16, 0x12u8);
@@ -123,6 +139,11 @@ mod tests {
         mem.write_u8(0x2006u16, 0x34u8);
         assert_eq!(mem.ppu_registers[0x06], 0x34u8);
         assert_eq!(mem.is_second_write, true);
+    }
+
+    # [test]
+    fn test_read_and_write_to_address_0x2007() {
+        let mut mem = Memory::default();
 
         mem.write_u8(0x2007u16, 0x56u8);
         assert_eq!(mem.read_u8(0x2007u16), 0x56u8);
