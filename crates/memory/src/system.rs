@@ -23,7 +23,7 @@ impl SystemBus for Memory {
                     self.request_to_read_ppu_data = true;
                     self.ppu_registers[index]
                 }
-                _ =>  todo!("{}", index),
+                _ => self.ppu_registers[index],
             };
             return value;
         }
@@ -72,7 +72,7 @@ impl SystemBus for Memory {
                     self.ppu_registers[index] = data;
                     self.request_to_write_ppu_data = true;
                 }
-                _ =>  todo!("{}", index),
+                _ => self.ppu_registers[index] = data
             };
             return;
         }
