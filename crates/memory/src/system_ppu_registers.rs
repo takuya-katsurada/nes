@@ -2,6 +2,7 @@ use crate::Memory;
 
 pub trait PpuRegistersController {
     // 0x2001: PPU MASK
+    fn read_ppu_is_clip_sprite(&mut self) -> bool;
     fn read_ppu_is_write_bg(&mut self) -> bool;
     fn read_ppu_is_write_sprite(&mut self) -> bool;
     // 0x2003: OAM ADDR (Object Attribute Memory).
@@ -17,6 +18,9 @@ pub trait PpuRegistersController {
 }
 
 impl PpuRegistersController for Memory {
+    fn read_ppu_is_clip_sprite(&mut self) -> bool {
+        (self.ppu_registers[0x01] & 0x04u8) == 0x04u8
+    }
 
     fn read_ppu_is_write_bg(&mut self) -> bool {
         (self.ppu_registers[0x01] & 0x08u8) == 0x08u8
