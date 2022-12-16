@@ -2,6 +2,7 @@ use crate::Memory;
 
 pub trait PpuRegistersController {
     // 0x2001: PPU MASK
+    fn read_is_monochrome(&self) -> bool;
     fn read_ppu_is_clip_bg(&mut self) -> bool;
     fn read_ppu_is_clip_sprite(&mut self) -> bool;
     fn read_ppu_is_write_bg(&mut self) -> bool;
@@ -19,6 +20,10 @@ pub trait PpuRegistersController {
 }
 
 impl PpuRegistersController for Memory {
+    fn read_is_monochrome(&self) -> bool {
+        (self.ppu_registers[0x01] & 0x01u8) == 0x01u8
+    }
+
     fn read_ppu_is_clip_bg(&mut self) -> bool {
         (self.ppu_registers[0x01] & 0x02u8) == 0x02u8
     }
