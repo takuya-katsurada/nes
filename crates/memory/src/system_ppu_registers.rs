@@ -2,11 +2,11 @@ use crate::Memory;
 
 pub trait PpuRegistersController {
     // 0x2001: PPU MASK
-    fn read_is_monochrome(&self) -> bool;
-    fn read_ppu_is_clip_bg(&mut self) -> bool;
-    fn read_ppu_is_clip_sprite(&mut self) -> bool;
-    fn read_ppu_is_write_bg(&mut self) -> bool;
-    fn read_ppu_is_write_sprite(&mut self) -> bool;
+    fn read_ppu_mask_is_monochrome(&self) -> bool;
+    fn read_ppu_mask_is_clip_bg(&mut self) -> bool;
+    fn read_ppu_mask_is_clip_sprite(&mut self) -> bool;
+    fn read_ppu_mask_is_write_bg(&mut self) -> bool;
+    fn read_ppu_mask_is_write_sprite(&mut self) -> bool;
     // 0x2003: OAM ADDR (Object Attribute Memory).
     fn read_oam_address(&mut self) -> u8;
     // 0x2004: OAM DATA (Object Attribute Memory).
@@ -20,23 +20,23 @@ pub trait PpuRegistersController {
 }
 
 impl PpuRegistersController for Memory {
-    fn read_is_monochrome(&self) -> bool {
+    fn read_ppu_mask_is_monochrome(&self) -> bool {
         (self.ppu_registers[0x01] & 0x01u8) == 0x01u8
     }
 
-    fn read_ppu_is_clip_bg(&mut self) -> bool {
+    fn read_ppu_mask_is_clip_bg(&mut self) -> bool {
         (self.ppu_registers[0x01] & 0x02u8) == 0x02u8
     }
 
-    fn read_ppu_is_clip_sprite(&mut self) -> bool {
+    fn read_ppu_mask_is_clip_sprite(&mut self) -> bool {
         (self.ppu_registers[0x01] & 0x04u8) == 0x04u8
     }
 
-    fn read_ppu_is_write_bg(&mut self) -> bool {
+    fn read_ppu_mask_is_write_bg(&mut self) -> bool {
         (self.ppu_registers[0x01] & 0x08u8) == 0x08u8
     }
 
-    fn read_ppu_is_write_sprite(&mut self) -> bool {
+    fn read_ppu_mask_is_write_sprite(&mut self) -> bool {
         (self.ppu_registers[0x01] & 0x10u8) == 0x10u8
     }
 
