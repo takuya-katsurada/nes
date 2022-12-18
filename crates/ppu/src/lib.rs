@@ -1,5 +1,3 @@
-mod register;
-
 /// CPU cycles per line.
 pub const CPU_CYCLES_PER_LINE: usize = 341 / 3;
 
