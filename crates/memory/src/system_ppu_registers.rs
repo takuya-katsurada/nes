@@ -29,6 +29,8 @@ pub trait PpuRegistersController {
     // 0x2002: PPU STATUS
     fn is_vblank(&self) -> bool;
     fn on_vblank(&mut self, on: bool);
+    fn is_hit_sprite0(&self) -> bool;
+    fn on_hit_sprite0(&mut self, on: bool);
 
     // 0x2003: OAM ADDR
     fn read_oam_address(&mut self) -> u8;
@@ -116,6 +118,16 @@ impl PpuRegistersController for Memory {
     fn on_vblank(&mut self, on: bool) {
         let v = self.ppu_registers[PPU_STATUS];
         self.ppu_registers[PPU_STATUS] = if on { v | 0x80u8 } else { v & (!0x80u8) }
+    }
+
+    #[inline(always)]
+    fn is_hit_sprite0(&self) -> bool {
+        (self.ppu_registers[PPU_STATUS] & 0x40u8) == 0x40u8
+    }
+
+    fn on_hit_sprite0(&mut self, on: bool) {
+        let v = self.ppu_registers[PPU_STATUS];
+        self.ppu_registers[PPU_STATUS] = if on { v | 0x40u8 } else { v & (!0x40u8) }
     }
 
     #[inline(always)]
