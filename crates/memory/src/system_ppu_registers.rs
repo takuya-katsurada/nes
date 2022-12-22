@@ -31,6 +31,8 @@ pub trait PpuRegistersController {
     fn on_vblank(&mut self, on: bool);
     fn is_hit_sprite0(&self) -> bool;
     fn on_hit_sprite0(&mut self, on: bool);
+    fn is_sprite_overflow(&self) -> bool;
+    fn on_sprite_overflow(&mut self, on: bool);
 
     // 0x2003: OAM ADDR
     fn read_oam_address(&mut self) -> u8;
@@ -125,9 +127,19 @@ impl PpuRegistersController for Memory {
         (self.ppu_registers[PPU_STATUS] & 0x40u8) == 0x40u8
     }
 
+    #[inline(always)]
     fn on_hit_sprite0(&mut self, on: bool) {
         let v = self.ppu_registers[PPU_STATUS];
         self.ppu_registers[PPU_STATUS] = if on { v | 0x40u8 } else { v & (!0x40u8) }
+    }
+
+    #[inline(always)]
+    fn is_sprite_overflow(&self) -> bool {
+        (self.ppu_registers[PPU_STATUS] & 0x20u8) == 0x20u8
+    }
+    fn on_sprite_overflow(&mut self, on: bool) {
+        let v = self.ppu_registers[PPU_STATUS];
+        self.ppu_registers[PPU_STATUS] = if on { v | 0x20u8 } else { v & (!0x20u8) }
     }
 
     #[inline(always)]
