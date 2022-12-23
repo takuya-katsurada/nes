@@ -210,3 +210,27 @@ impl PpuRegistersController for Memory {
         self.ppu_registers[PPU_DATA] = data;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::Memory;
+    use crate::system::SystemBus;
+    use crate::system_ppu_registers::PpuRegistersController;
+
+    # [test]
+    fn test_ppu_mask() {
+        let mut mem = Memory::default();
+        assert_eq!(mem.is_monochrome(), false);
+        assert_eq!(mem.is_clip_bg(), false);
+        assert_eq!(mem.is_clip_sprite(), false);
+        assert_eq!(mem.is_write_bg(), false);
+        assert_eq!(mem.is_write_sprite(), false);
+
+        mem.ppu_registers[super::PPU_MASK] = 0xffu8;
+        assert_eq!(mem.is_monochrome(), true);
+        assert_eq!(mem.is_clip_bg(), true);
+        assert_eq!(mem.is_clip_sprite(), true);
+        assert_eq!(mem.is_write_bg(), true);
+        assert_eq!(mem.is_write_sprite(), true);
+    }
+}
