@@ -41,6 +41,15 @@ impl Ppu {
         let (scroll_x, scroll_y, _) = registers.read_ppu_scroll();
         self.fetch_scroll_x = scroll_x;
         self.fetch_scroll_y = scroll_y;
+        
+        let (ppu_data, is_read_ppu_data, is_write_ppu_data) = registers.read_ppu_data();
+        if is_write_ppu_data {
+            registers.increment_ppu_address();
+        }
+        if is_read_ppu_data {
+            registers.write_ppu_data(ppu_data);
+            registers.increment_ppu_address();
+        }
 
         let address = registers.read_oam_address();
         let (data, reading_requested, writing_requested) = registers.read_oam_data();

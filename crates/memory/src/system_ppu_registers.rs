@@ -51,6 +51,8 @@ pub trait PpuRegistersController {
     // $2007: PPU DATA
     fn read_ppu_data(&mut self) -> (u8, bool, bool);
     fn write_ppu_data(&mut self, data: u8);
+
+    fn increment_ppu_address(&mut self);
 }
 
 impl PpuRegistersController for Memory {
@@ -218,6 +220,14 @@ impl PpuRegistersController for Memory {
     #[inline(always)]
     fn write_ppu_data(&mut self, data: u8) {
         self.ppu_registers[PPU_DATA] = data;
+    }
+
+    fn increment_ppu_address(&mut self) {
+        let current = u16::from(self.ppu_registers[PPU_ADDR]) << 8;
+        let address = current.wrapping_add(u16::from(self.address_increment()));
+
+        self.ppu_register_address_lower = (address & 0xff) as u8;
+        self.ppu_registers[PPU_ADDR] = (address >> 8) as u8;
     }
 }
 
