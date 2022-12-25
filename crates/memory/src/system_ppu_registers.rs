@@ -38,6 +38,9 @@ pub trait PpuRegistersController {
     // 0x2003: OAM ADDR
     fn read_oam_address(&mut self) -> u8;
 
+    // 0x2005: PPU SCROLL
+    fn read_ppu_scroll(&mut self) -> (u8, u8, bool);
+
     // 0x2004: OAM DATA
     fn read_oam_data(&mut self) -> (u8, bool, bool);
     fn write_oam_data(&mut self, data: u8);
@@ -176,6 +179,13 @@ impl PpuRegistersController for Memory {
     #[inline(always)]
     fn write_oam_data(&mut self, data: u8) {
         self.ppu_registers[OAM_DATA] = data;
+    }
+
+    fn read_ppu_scroll(&mut self) -> (u8, u8, bool) {
+        let is_request = self.request_to_write_ppu_scroll;
+
+        self.request_to_write_ppu_scroll = false;
+        (self.ppu_register_scroll_y, self.ppu_registers[PPU_SCROLL], is_request)
     }
 
     fn read_ppu_address(&mut self) -> (u16, bool) {
