@@ -32,6 +32,8 @@ impl Default for Ppu {
 impl Ppu {
     pub fn reset(&mut self) {
         self.oam = [0; OAM_SIZE];
+        self.fetch_scroll_x = 0;
+        self.fetch_scroll_y = 0;
     }
 
     pub fn step(
@@ -41,7 +43,7 @@ impl Ppu {
         let (scroll_x, scroll_y, _) = registers.read_ppu_scroll();
         self.fetch_scroll_x = scroll_x;
         self.fetch_scroll_y = scroll_y;
-        
+
         let (ppu_data, is_read_ppu_data, is_write_ppu_data) = registers.read_ppu_data();
         if is_write_ppu_data {
             registers.increment_ppu_address();
