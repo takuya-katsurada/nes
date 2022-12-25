@@ -185,7 +185,7 @@ impl PpuRegistersController for Memory {
         let is_request = self.request_to_write_ppu_scroll;
 
         self.request_to_write_ppu_scroll = false;
-        (self.ppu_register_scroll_y, self.ppu_registers[PPU_SCROLL], is_request)
+        (self.ppu_registers[PPU_SCROLL], self.ppu_register_scroll_y, is_request)
     }
 
     fn read_ppu_address(&mut self) -> (u16, bool) {

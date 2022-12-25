@@ -14,12 +14,17 @@ pub const OAM_SIZE: usize = 0x0100;
 #[derive(Clone)]
 pub struct Ppu {
     oam: [u8; OAM_SIZE],
+
+    fetch_scroll_x: u8,
+    fetch_scroll_y: u8,
 }
 
 impl Default for Ppu {
     fn default() -> Self {
         Self {
             oam: [0; OAM_SIZE],
+            fetch_scroll_x: 0,
+            fetch_scroll_y: 0,
         }
     }
 }
@@ -33,17 +38,18 @@ impl Ppu {
         &mut self,
         registers: &mut dyn memory::system_ppu_registers::PpuRegistersController
     ) -> Option<cpu::Interrupt> {
+        let (scroll_x, scroll_y, _) = registers.read_ppu_scroll();
+        self.fetch_scroll_x = scroll_x;
+        self.fetch_scroll_y = scroll_y;
 
-        {
-            let address = registers.read_oam_address();
-            let (data, reading_requested, writing_requested) = registers.read_oam_data();
-            if writing_requested {
-                self.oam[usize::from(address)] = data;
-            }
-            if reading_requested {
-                let data = self.oam[usize::from(address)];
-                registers.write_oam_data(data);
-            }
+        let address = registers.read_oam_address();
+        let (data, reading_requested, writing_requested) = registers.read_oam_data();
+        if writing_requested {
+            self.oam[usize::from(address)] = data;
+        }
+        if reading_requested {
+            let data = self.oam[usize::from(address)];
+            registers.write_oam_data(data);
         }
 
         None
@@ -63,6 +69,22 @@ mod tests {
         ppu.reset();
 
         assert_eq!(ppu.oam, [0; OAM_SIZE]);
+        assert_eq!(ppu.fetch_scroll_x, 0);
+        assert_eq!(ppu.fetch_scroll_y, 0);
+    }
+
+    # [test]
+    fn execute_step_to_read_scroll()
+    {
+        let mut ppu = super::Ppu::default();
+        let mut mem = memory::Memory::default();
+
+        mem.write_u8(0x2005, 0x12);
+        mem.write_u8(0x2005, 0x34);
+        ppu.step(&mut mem);
+
+        assert_eq!(ppu.fetch_scroll_x, 0x12u8);
+        assert_eq!(ppu.fetch_scroll_y, 0x34u8);
     }
 
     # [test]
