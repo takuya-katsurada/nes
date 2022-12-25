@@ -233,4 +233,21 @@ mod tests {
         assert_eq!(mem.is_write_bg(), true);
         assert_eq!(mem.is_write_sprite(), true);
     }
+
+    #[test]
+    fn test_ppu_status() {
+        let mut mem = Memory::default();
+
+        mem.on_vblank(true);
+        mem.on_hit_sprite0(true);
+        mem.on_sprite_overflow(true);
+        assert_eq!(mem.is_vblank(), true);
+        assert_eq!(mem.is_hit_sprite0(), true);
+        assert_eq!(mem.is_sprite_overflow(), true);
+
+        mem.clear_ppu_status();
+        assert_eq!(mem.is_vblank(), false);
+        assert_eq!(mem.is_hit_sprite0(), false);
+        assert_eq!(mem.is_sprite_overflow(), false);
+    }
 }
