@@ -1,3 +1,7 @@
+use crate::video::Video;
+
+mod video;
+
 /// CPU cycles per line.
 pub const CPU_CYCLES_PER_LINE: usize = 341 / 3;
 
@@ -14,6 +18,7 @@ pub const OAM_SIZE: usize = 0x0100;
 #[derive(Clone)]
 pub struct Ppu {
     oam: [u8; OAM_SIZE],
+    video: Video,
 
     fetch_scroll_x: u8,
     fetch_scroll_y: u8,
@@ -23,6 +28,7 @@ impl Default for Ppu {
     fn default() -> Self {
         Self {
             oam: [0; OAM_SIZE],
+            video: Default::default(),
             fetch_scroll_x: 0,
             fetch_scroll_y: 0,
         }
@@ -44,12 +50,14 @@ impl Ppu {
         self.fetch_scroll_x = scroll_x;
         self.fetch_scroll_y = scroll_y;
 
+        let (ppu_address, _) = registers.read_ppu_address();
         let (ppu_data, is_read_ppu_data, is_write_ppu_data) = registers.read_ppu_data();
         if is_write_ppu_data {
+            self.video.write(ppu_address, ppu_data);
             registers.increment_ppu_address();
         }
         if is_read_ppu_data {
-            registers.write_ppu_data(ppu_data);
+            registers.write_ppu_data(self.video.read(ppu_address));
             registers.increment_ppu_address();
         }
 
