@@ -38,12 +38,12 @@ pub trait PpuRegistersController {
     // 0x2003: OAM ADDR
     fn read_oam_address(&mut self) -> u8;
 
-    // 0x2005: PPU SCROLL
-    fn read_ppu_scroll(&mut self) -> (u8, u8, bool);
-
     // 0x2004: OAM DATA
     fn read_oam_data(&mut self) -> (u8, bool, bool);
     fn write_oam_data(&mut self, data: u8);
+
+    // 0x2005: PPU SCROLL
+    fn read_ppu_scroll(&mut self) -> (u8, u8, bool);
 
     // 0x2006: PPU ADDR.
     fn read_ppu_address(&mut self) -> (u16, bool);
@@ -297,5 +297,12 @@ mod tests {
         assert_eq!(mem.is_vblank(), false);
         assert_eq!(mem.is_hit_sprite0(), false);
         assert_eq!(mem.is_sprite_overflow(), false);
+    }
+
+    #[test]
+    fn test_oam_address() {
+        let mut mem = Memory::default();
+        mem.ppu_registers[super::OAM_ADDR] = 0x80;
+        assert_eq!(mem.read_oam_address(), 0x80);
     }
 }
