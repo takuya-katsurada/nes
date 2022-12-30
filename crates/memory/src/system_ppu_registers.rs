@@ -305,4 +305,15 @@ mod tests {
         mem.ppu_registers[super::OAM_ADDR] = 0x80;
         assert_eq!(mem.read_oam_address(), 0x80);
     }
+
+    #[test]
+    fn test_oam_data() {
+        let mut mem = Memory::default();
+        mem.request_to_read_oam_data  = true;
+        mem.request_to_write_oam_data = true;
+        mem.write_oam_data(0xff);
+        assert_eq!(mem.read_oam_data(), (0xff, false, true));
+        assert_eq!(mem.read_oam_data(), (0xff, true, false));
+        assert_eq!(mem.read_oam_data(), (0xff, false, false));
+    }
 }
