@@ -238,6 +238,34 @@ mod tests {
     use crate::system_ppu_registers::PpuRegistersController;
 
     # [test]
+    fn test_ppu_ctrl() {
+        let mut mem = Memory::default();
+        assert_eq!(mem.address_increment(), 1);
+        assert_eq!(mem.sprite_pattern_table_address(), 0x0000u16);
+        assert_eq!(mem.bg_pattern_table_address(), 0x0000u16);
+        assert_eq!(mem.sprite_height(), 8);
+        assert_eq!(mem.is_master(), false);
+        assert_eq!(mem.is_nmi_enable(), false);
+
+        mem.ppu_registers[super::PPU_CTRL] = 0x00;
+        assert_eq!(mem.name_table_base_address(), 0x2000);
+        mem.ppu_registers[super::PPU_CTRL] = 0x01;
+        assert_eq!(mem.name_table_base_address(), 0x2400);
+        mem.ppu_registers[super::PPU_CTRL] = 0x02;
+        assert_eq!(mem.name_table_base_address(), 0x2800);
+        mem.ppu_registers[super::PPU_CTRL] = 0x03;
+        assert_eq!(mem.name_table_base_address(), 0x2c00);
+
+        mem.ppu_registers[super::PPU_CTRL] = 0xff;
+        assert_eq!(mem.address_increment(), 32);
+        assert_eq!(mem.sprite_pattern_table_address(), 0x1000u16);
+        assert_eq!(mem.bg_pattern_table_address(), 0x1000u16);
+        assert_eq!(mem.sprite_height(), 16);
+        assert_eq!(mem.is_master(), true);
+        assert_eq!(mem.is_nmi_enable(), true);
+    }
+
+    # [test]
     fn test_ppu_mask() {
         let mut mem = Memory::default();
         assert_eq!(mem.is_monochrome(), false);
