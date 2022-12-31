@@ -1,7 +1,10 @@
 [package]
 name = "nes-desktop-example-app"
 version = "0.1.0"
+authors = ["Takuya Katsurada <116815666+takuya-katsurada@users.noreply.github.com>"]
 edition = "2021"
+description = "NES emulator written in Rust"
+license = "MIT"
 
 [workspace]
 
