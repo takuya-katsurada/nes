@@ -103,51 +103,47 @@ mod tests {
     }
 
     # [test]
-    fn test_read_and_write_to_address_0x2004() {
+    fn test_read_and_write_to_ppu_registers() {
         let mut mem = Memory::default();
 
-        mem.write_u8(0x2004u16, 0xffu8);
-        assert_eq!(mem.read_u8(0x2004u16), 0xffu8);
+        // 0x2000-0x2004
+        for code in 0x2000u16..=0x2004u16 {
+            mem.write_u8(code, 0xffu8);
+            assert_eq!(mem.read_u8(code), 0xffu8);
+        }
         assert!(mem.request_to_read_oam_data);
         assert!(mem.request_to_write_oam_data);
-    }
 
-    # [test]
-    fn test_read_and_write_to_address_0x2005() {
-        let mut mem = Memory::default();
+        // 0x2005
+        {
+            mem.write_u8(0x2005u16, 0x34u8);
+            assert_eq!(mem.read_u8(0x2005u16), 0x34u8);
+            assert_eq!(mem.is_second_write, true);
 
-        mem.is_second_write = true;
-        mem.write_u8(0x2005u16, 0x12u8);
-        assert_eq!(mem.ppu_register_scroll_y, 0x12u8);
-        assert_eq!(mem.request_to_write_ppu_scroll, true);
-        assert_eq!(mem.is_second_write, false);
+            mem.write_u8(0x2005u16, 0x12u8);
+            assert_eq!(mem.ppu_register_scroll_y, 0x12u8);
+            assert_eq!(mem.request_to_write_ppu_scroll, true);
+            assert_eq!(mem.is_second_write, false);
+        }
 
-        mem.write_u8(0x2005u16, 0x34u8);
-        assert_eq!(mem.ppu_registers[0x05], 0x34u8);
-        assert_eq!(mem.is_second_write, true);
-    }
+        // 0x2006
+        {
+            mem.write_u8(0x2006u16, 0x34u8);
+            assert_eq!(mem.read_u8(0x2006u16), 0x34u8);
+            assert_eq!(mem.is_second_write, true);
 
-    # [test]
-    fn test_read_and_write_to_address_0x2006() {
-        let mut mem = Memory::default();
+            mem.write_u8(0x2006u16, 0x12u8);
+            assert_eq!(mem.ppu_register_address_lower, 0x12u8);
+            assert_eq!(mem.request_to_write_ppu_address, true);
+            assert_eq!(mem.is_second_write, false);
+        }
 
-        mem.is_second_write = true;
-        mem.write_u8(0x2006u16, 0x12u8);
-        assert_eq!(mem.ppu_register_address_lower, 0x12u8);
-        assert_eq!(mem.request_to_write_ppu_address, true);
-        assert_eq!(mem.is_second_write, false);
-        mem.write_u8(0x2006u16, 0x34u8);
-        assert_eq!(mem.ppu_registers[0x06], 0x34u8);
-        assert_eq!(mem.is_second_write, true);
-    }
-
-    # [test]
-    fn test_read_and_write_to_address_0x2007() {
-        let mut mem = Memory::default();
-
-        mem.write_u8(0x2007u16, 0x56u8);
-        assert_eq!(mem.read_u8(0x2007u16), 0x56u8);
-        assert_eq!(mem.request_to_read_ppu_data, true);
-        assert_eq!(mem.request_to_write_ppu_data, true);
+        // 0x2007
+        {
+            mem.write_u8(0x2007u16, 0x56u8);
+            assert_eq!(mem.read_u8(0x2007u16), 0x56u8);
+            assert_eq!(mem.request_to_read_ppu_data, true);
+            assert_eq!(mem.request_to_write_ppu_data, true);
+        }
     }
 }
