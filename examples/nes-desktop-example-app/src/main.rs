@@ -1,6 +1,9 @@
 use clap::{Parser};
 use std::fs;
 use std::path::PathBuf;
+use piston_window::PistonWindow;
+
+extern crate piston_window;
 
 #[derive(Debug, Parser)]
 #[clap(
@@ -25,4 +28,17 @@ fn main() {
         Err(error) => panic!("{:?}", error)
     };
     println!("{:?}", f);
+
+    let width  = nes::RENDER_SCREEN_AREA_WIDTH as u32;
+    let height = nes::RENDER_SCREEN_AREA_HEIGHT as u32;
+
+    let mut window: PistonWindow = piston_window::WindowSettings::new("Nes", (width, height))
+        .exit_on_esc(true)
+        .graphics_api(piston_window::OpenGL::V3_2)
+        .build()
+        .unwrap();
+
+    while let Some(e) = window.next(){
+
+    }
 }

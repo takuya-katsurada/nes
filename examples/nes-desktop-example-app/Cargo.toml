@@ -11,3 +11,4 @@ license = "MIT"
 [dependencies]
 clap = { version = "4.0.29", features = ["derive"] }
 nes = { path = "../../../nes" }
+piston_window = "0.127.0"
