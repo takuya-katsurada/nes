@@ -6,6 +6,9 @@ use memory::Memory;
 use rom::Rom;
 use errors::EmulationError;
 
+pub const RENDER_SCREEN_AREA_WIDTH:  usize = ppu::RENDER_SCREEN_AREA_WIDTH;
+pub const RENDER_SCREEN_AREA_HEIGHT: usize = ppu::RENDER_SCREEN_AREA_HEIGHT;
+
 #[derive(Clone)]
 pub struct Nes {
     cpu: Cpu,
