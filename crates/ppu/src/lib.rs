@@ -44,6 +44,7 @@ impl Ppu {
 
     pub fn step(
         &mut self,
+        cpu_cycle: usize,
         registers: &mut dyn memory::system_ppu_registers::PpuRegistersController
     ) -> Option<cpu::Interrupt> {
         let (scroll_x, scroll_y, _) = registers.read_ppu_scroll();
@@ -100,7 +101,7 @@ mod tests {
 
         mem.write_u8(0x2005, 0x12);
         mem.write_u8(0x2005, 0x34);
-        ppu.step(&mut mem);
+        ppu.step(0, &mut mem);
 
         assert_eq!(ppu.fetch_scroll_x, 0x12u8);
         assert_eq!(ppu.fetch_scroll_y, 0x34u8);
@@ -115,7 +116,7 @@ mod tests {
 
             mem.ppu_registers[0x03] = 0xff;
             mem.write_u8(0x2004, 0x80);
-            ppu.step(&mut mem);
+            ppu.step(0, &mut mem);
 
             assert_eq!(ppu.oam[0xff], 0x80);
         }
@@ -128,7 +129,7 @@ mod tests {
             mem.ppu_registers[0x03] = 0xff;
             mem.ppu_registers[0x04] = 0x80;
             mem.read_u8(0x2004);
-            ppu.step(&mut mem);
+            ppu.step(0, &mut mem);
 
             assert_eq!(mem.ppu_registers[0x04], 0x0f);
         }
