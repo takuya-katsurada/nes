@@ -22,6 +22,7 @@ pub struct Ppu {
 
     fetch_scroll_x: u8,
     fetch_scroll_y: u8,
+    cumulative_cpu_cycles: usize,
 }
 
 impl Default for Ppu {
@@ -31,6 +32,7 @@ impl Default for Ppu {
             video: Default::default(),
             fetch_scroll_x: 0,
             fetch_scroll_y: 0,
+            cumulative_cpu_cycles: 0,
         }
     }
 }
@@ -44,7 +46,7 @@ impl Ppu {
 
     pub fn step(
         &mut self,
-        cpu_cycle: usize,
+        cpu_cycles: usize,
         registers: &mut dyn memory::system_ppu_registers::PpuRegistersController
     ) -> Option<cpu::Interrupt> {
         let (scroll_x, scroll_y, _) = registers.read_ppu_scroll();
@@ -72,6 +74,13 @@ impl Ppu {
             registers.write_oam_data(data);
         }
 
+        let current_cup_cycles = self.cumulative_cpu_cycles + cpu_cycles;
+        if current_cup_cycles >= CPU_CYCLES_PER_LINE {
+            self.cumulative_cpu_cycles = current_cup_cycles - CPU_CYCLES_PER_LINE;
+        } else {
+            self.cumulative_cpu_cycles = current_cup_cycles;
+        }
+
         None
     }
 }
@@ -91,6 +100,7 @@ mod tests {
         assert_eq!(ppu.oam, [0; OAM_SIZE]);
         assert_eq!(ppu.fetch_scroll_x, 0);
         assert_eq!(ppu.fetch_scroll_y, 0);
+        assert_eq!(ppu.cumulative_cpu_cycles, 0);
     }
 
     # [test]
