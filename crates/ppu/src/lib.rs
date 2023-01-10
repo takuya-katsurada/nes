@@ -15,6 +15,26 @@ pub const CPU_CYCLES_PER_DRAW_FRAME: usize = CPU_CYCLES_PER_LINE * ((RENDER_SCRE
 
 pub const OAM_SIZE: usize = 0x0100;
 
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
+enum ScanLineMode {
+    Visible,
+    PostRender,
+    VerticalBlanking,
+    PreRender
+}
+
+impl ScanLineMode {
+    fn from(line: u16) -> ScanLineMode {
+        match line {
+            0..=239   => ScanLineMode::Visible,
+            240       => ScanLineMode::PostRender,
+            241..=260 => ScanLineMode::VerticalBlanking,
+            261       => ScanLineMode::PreRender,
+            _         => panic!("invalid line")
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Ppu {
     oam: [u8; OAM_SIZE],
@@ -89,7 +109,7 @@ impl Ppu {
 mod tests {
     use memory::system::SystemBus;
     use memory::system_ppu_registers::PpuRegistersController;
-    use crate::OAM_SIZE;
+    use crate::{OAM_SIZE, ScanLineMode};
 
     # [test]
     fn reset()
@@ -101,6 +121,17 @@ mod tests {
         assert_eq!(ppu.fetch_scroll_x, 0);
         assert_eq!(ppu.fetch_scroll_y, 0);
         assert_eq!(ppu.cumulative_cpu_cycles, 0);
+    }
+
+    # [test]
+    fn scan_line_mode_form_u16()
+    {
+        assert_eq!(ScanLineMode::from(0), ScanLineMode::Visible);
+        assert_eq!(ScanLineMode::from(239), ScanLineMode::Visible);
+        assert_eq!(ScanLineMode::from(240), ScanLineMode::PostRender);
+        assert_eq!(ScanLineMode::from(241), ScanLineMode::VerticalBlanking);
+        assert_eq!(ScanLineMode::from(260), ScanLineMode::VerticalBlanking);
+        assert_eq!(ScanLineMode::from(261), ScanLineMode::PreRender);
     }
 
     # [test]
